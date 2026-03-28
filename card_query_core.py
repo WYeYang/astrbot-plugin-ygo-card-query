@@ -22,11 +22,6 @@ class CardQueryCore:
         # 数据库目录路径
         self.db_dir = os.path.join(self.data_dir, "ygopro-database")
         print(f"CardQuery 数据目录: {self.data_dir}")
-        
-        # 初始化时检查并克隆数据库
-        if not os.path.exists(self.db_dir):
-            print("数据库目录不存在，自动克隆...")
-            self.update_database()
     
     def _execute_git_command(self, cmd, cwd, description):
         """执行 git 命令并实时输出日志"""
