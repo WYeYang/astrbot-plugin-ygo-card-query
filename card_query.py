@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-自然语言查卡插件 - 基于asrtbot
+游戏王查卡插件 - 基于asrtbot
 """
 
 from .card_query_core import CardQueryCore
@@ -16,7 +16,7 @@ class CardQueryPlugin(Star):
     def __init__(self, context=None, config: AstrBotConfig = None):
         super().__init__(context, config)
         self.name = "astrbot_plugin_ygo_card_query"
-        self.description = "游戏王自然语言查卡插件"
+        self.description = "游戏王查卡插件"
         self.version = "1.0.0"
         
         # 获取数据目录
@@ -166,7 +166,7 @@ class CardQueryPlugin(Star):
     
     @filter.command("查卡", alias={"/查卡"})
     async def handle_cha_ka(self, event: AstrMessageEvent):
-        """自然语言查卡（只查询卡片名称）"""
+        """查卡（只查询卡片名称）"""
         message_text = event.get_message_str().strip()
         logger.info(f"收到查卡命令: {message_text}")
         
