@@ -20,14 +20,12 @@ class CardQueryPlugin(Star):
         self.description = "游戏王查卡插件"
         self.version = "1.0.0"
         
-        # 获取插件目录（不是 plugin_data 目录）
+        # 获取数据目录（使用 plugin_data 目录）
         try:
-            # 尝试获取插件目录
-            import astrbot.core.star as star
-            data_dir = os.path.dirname(os.path.abspath(__file__))
-            logger.info(f"使用插件目录: {data_dir}")
+            data_dir = StarTools.get_data_dir()
+            logger.info(f"使用数据目录: {data_dir}")
         except Exception as e:
-            logger.warning(f"获取插件目录失败 ({e})，使用手动路径兜底。")
+            logger.warning(f"StarTools.get_data_dir() 自动获取失败 ({e})，使用手动路径兜底。")
             data_dir = None
         
         # 初始化核心功能
