@@ -10,6 +10,7 @@ from astrbot.core.config.astrbot_config import AstrBotConfig
 from astrbot.core.platform.astr_message_event import AstrMessageEvent
 import astrbot.api.message_components as Comp
 from astrbot.api.all import logger
+from typing import Dict, Any
 
 class CardQueryPlugin(Star):
     def __init__(self, context=None, config: AstrBotConfig = None):
