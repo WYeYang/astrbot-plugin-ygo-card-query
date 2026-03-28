@@ -10,7 +10,7 @@ from astrbot.core.config.astrbot_config import AstrBotConfig
 from astrbot.core.platform.astr_message_event import AstrMessageEvent
 import astrbot.api.message_components as Comp
 from astrbot.api.all import logger
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 @register("astrbot_plugin_ygo_card_query", "Wen", "游戏王查卡插件", "1.0.0")
 class CardQueryPlugin(Star):
