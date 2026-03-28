@@ -9,7 +9,21 @@ import sqlite3
 import subprocess
 import time
 import threading
+import asyncio
 from typing import Dict, Any, List
+
+# 模拟 logger 接口
+class Logger:
+    def info(self, msg):
+        print(f"[INFO] {msg}")
+    
+    def error(self, msg):
+        print(f"[ERROR] {msg}")
+    
+    def warning(self, msg):
+        print(f"[WARNING] {msg}")
+
+logger = Logger()
 
 class CardQueryCore:
     """游戏王查卡核心功能"""
@@ -21,28 +35,31 @@ class CardQueryCore:
         
         # 数据库目录路径
         self.db_dir = os.path.join(self.data_dir, "ygopro-database")
-        print(f"CardQuery 数据目录: {self.data_dir}")
+        logger.info(f"CardQuery 数据目录: {self.data_dir}")
     
-    def _execute_git_command(self, cmd, cwd, description):
+    async def _execute_git_command(self, cmd, cwd, description):
         """执行 git 命令并实时输出日志"""
-        process = subprocess.Popen(
-            cmd,
+        logger.info(f"开始执行 {description}...")
+        logger.info(f"命令: {' '.join(cmd)}")
+        logger.info(f"工作目录: {cwd}")
+        
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
             cwd=cwd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # 将 stderr 重定向到 stdout
-            bufsize=0,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,  # 将 stderr 重定向到 stdout
         )
         
         stdout_lines = []
         current_line = []
         
-        print(f"开始实时读取 {description} 输出...")
+        logger.info(f"开始实时读取 {description} 输出...")
         
         # 实时读取输出 - 逐字符读取以处理 \r 进度更新
         while True:
-            char = process.stdout.read(1)
+            char = await process.stdout.read(1)
             if not char:
-                if process.poll() is not None:
+                if process.returncode is not None:
                     break
                 continue
             
@@ -55,7 +72,7 @@ class CardQueryCore:
                 # 行结束，输出当前行
                 if current_line:
                     line = ''.join(current_line)
-                    print(f"[{description}] {line}")
+                    logger.info(f"[{description}] {line}")
                     stdout_lines.append(line + '\n')
                     current_line = []
             else:
@@ -64,11 +81,11 @@ class CardQueryCore:
         # 处理剩余的数据
         if current_line:
             line = ''.join(current_line)
-            print(f"[{description}] {line}")
+            logger.info(f"[{description}] {line}")
             stdout_lines.append(line + '\n')
         
-        process.wait()
-        print(f"{description} 返回码: {process.returncode}")
+        await process.wait()
+        logger.info(f"{description} 返回码: {process.returncode}")
         
         if process.returncode != 0:
             raise Exception(f"{description} 失败，返回码: {process.returncode}")
@@ -78,38 +95,38 @@ class CardQueryCore:
             'stderr': ''
         })()
     
-    def update_database(self) -> Dict[str, Any]:
+    async def update_database(self) -> Dict[str, Any]:
         """更新游戏王数据库"""
         try:
-            print("开始更新游戏王数据库...")
-            print(f"数据目录: {self.data_dir}")
-            print(f"数据库目录: {self.db_dir}")
+            logger.info("开始更新游戏王数据库...")
+            logger.info(f"数据目录: {self.data_dir}")
+            logger.info(f"数据库目录: {self.db_dir}")
             
             # 进入ygopro-database目录并执行git pull
             if os.path.exists(self.db_dir):
-                print("数据库目录已存在，执行git pull更新")
+                logger.info("数据库目录已存在，执行git pull更新")
                 # 执行git pull更新数据库
-                result = self._execute_git_command(
+                result = await self._execute_git_command(
                     ["git", "pull"],
                     cwd=self.db_dir,
                     description="git pull"
                 )
             else:
-                print("数据库目录不存在，开始克隆数据库")
-                print(f"克隆目标目录: {self.data_dir}")
-                print("正在执行 git clone，这可能需要一些时间...")
+                logger.info("数据库目录不存在，开始克隆数据库")
+                logger.info(f"克隆目标目录: {self.data_dir}")
+                logger.info("正在执行 git clone，这可能需要一些时间...")
                 
                 # 首次克隆数据库
                 # 直接使用 GitHub 原始地址
-                result = self._execute_git_command(
+                result = await self._execute_git_command(
                     ["git", "clone", "--progress", "https://github.com/moecube/ygopro-database.git", "ygopro-database"],
                     cwd=self.data_dir,
                     description="git clone"
                 )
                 
-                print(f"git clone执行完成")
+                logger.info("git clone执行完成")
             
-            print("数据库更新完成")
+            logger.info("数据库更新完成")
             
             return {
                 "status": "success",
@@ -119,7 +136,7 @@ class CardQueryCore:
                 "card_count": 0
             }
         except Exception as e:
-            print(f"更新数据库失败: {e}")
+            logger.error(f"更新数据库失败: {e}")
             import traceback
             traceback.print_exc()
             return {
@@ -153,7 +170,7 @@ class CardQueryCore:
         表关系：datas.id = texts.id
         """
         # 每次查询时直接执行SQL查询
-        print("开始查询，执行SQL查询...")
+        logger.info("开始查询，执行SQL查询...")
         
         # 尝试从SQLite数据库直接查询
         cdb_path = os.path.join(self.db_dir, "locales", "zh-CN", "cards.cdb")
@@ -176,7 +193,7 @@ class CardQueryCore:
                     JOIN texts t ON d.id = t.id
                 """
             
-            print(f"执行SQL: {sql}")
+            logger.info(f"执行SQL: {sql}")
             cursor.execute(sql)
             query_results = cursor.fetchall()
             
@@ -218,9 +235,9 @@ class CardQueryCore:
                 results.append(card)
             
             conn.close()
-            print(f"SQL查询完成，找到 {len(results)} 张卡片")
+            logger.info(f"SQL查询完成，找到 {len(results)} 张卡片")
         except Exception as e:
-            print(f"SQL查询失败: {e}")
+            logger.error(f"SQL查询失败: {e}")
             raise
         
         return {
@@ -235,5 +252,5 @@ class CardQueryCore:
         """获取卡片图片URL"""
         # 卡片图片URL
         image_url = f"https://cdn.233.momobako.com/ygopro/pics/{card_id}.jpg"
-        print(f"生成卡片图片链接: {card_id}")
+        logger.info(f"生成卡片图片链接: {card_id}")
         return image_url

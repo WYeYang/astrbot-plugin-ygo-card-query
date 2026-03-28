@@ -205,7 +205,7 @@ class CardQueryPlugin(Star):
         await event.send(event.plain_result("🔍 正在更新游戏王卡片数据库，请稍候..."))
         
         logger.info("开始执行数据库更新")
-        result = self.core.update_database()
+        result = await self.core.update_database()
         logger.info(f"数据库更新完成: status={result['status']}")
         
         if result["status"] == "success":
