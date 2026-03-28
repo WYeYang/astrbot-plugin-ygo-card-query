@@ -33,9 +33,14 @@ class CardQueryCore:
         # 设置数据目录
         self.data_dir = data_dir if data_dir else os.getcwd()
         
-        # 数据库目录路径
+        # 数据库目录路径 - 使用 os.path.join 确保跨平台兼容
         self.db_dir = os.path.join(self.data_dir, "ygopro-database")
+        
+        # 记录路径信息以便调试
         logger.info(f"CardQuery 数据目录: {self.data_dir}")
+        logger.info(f"数据库目录: {self.db_dir}")
+        logger.info(f"操作系统: {os.name}")
+        logger.info(f"路径分隔符: {os.sep}")
     
     async def _execute_git_command(self, cmd, cwd, description):
         """执行 git 命令并实时输出日志"""
