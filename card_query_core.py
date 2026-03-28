@@ -181,7 +181,7 @@ class CardQueryCore:
         
         if not os.path.exists(cdb_path):
             # 数据库文件不存在，抛出异常
-            raise Exception("数据库文件不存在，请先更新数据库")
+            raise Exception(f"数据库文件不存在: {cdb_path}\n请先使用命令 `/更新卡片数据库` 或 `/update_database` 下载数据库")
         
         try:
             conn = sqlite3.connect(cdb_path)
