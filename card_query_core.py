@@ -88,7 +88,10 @@ class CardQueryCore:
         logger.info(f"{description} 返回码: {process.returncode}")
         
         if process.returncode != 0:
-            raise Exception(f"{description} 失败，返回码: {process.returncode}")
+            error_output = ''.join(stdout_lines)
+            logger.error(f"{description} 失败，返回码: {process.returncode}")
+            logger.error(f"错误输出: {error_output}")
+            raise Exception(f"{description} 失败，返回码: {process.returncode}\n错误输出: {error_output}")
         
         return type('Result', (), {
             'stdout': ''.join(stdout_lines),
