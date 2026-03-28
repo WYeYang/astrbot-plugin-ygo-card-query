@@ -48,13 +48,14 @@ class CardQueryPlugin(Star):
             error_message = result.get('message', '未知错误')
             logger.error(f"查询出错: {error_message}")
             await self._send_text_message(event, f"❌ 查询出错: {error_message}")
-            return "查询完成"
+            return f"查询出错: {error_message}"
         
         # 处理无结果的情况
         if result["count"] == 0:
             logger.info("未找到与查询条件相关的卡片")
-            await self._send_text_message(event, "⚠️ 未找到与查询条件相关的卡片")
-            return "查询完成"
+            no_result_message = "⚠️ 未找到与查询条件相关的卡片"
+            await self._send_text_message(event, no_result_message)
+            return no_result_message
         
         # 处理有结果的情况
         if result["count"] == 1:

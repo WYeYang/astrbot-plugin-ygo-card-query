@@ -228,7 +228,7 @@ class CardQueryCore:
             "query": sql,
             "results": results,
             "count": len(results),
-            "note": "" if len(results) == 0 else ""
+            "note": "正在更新数据库，请稍后查询" if len(results) == 0 else ""
         }
     
     def get_card_image_url(self, card_id: int) -> str:
