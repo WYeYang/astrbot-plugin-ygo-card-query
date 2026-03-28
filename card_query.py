@@ -12,6 +12,7 @@ import astrbot.api.message_components as Comp
 from astrbot.api.all import logger
 from typing import Dict, Any
 
+@register("astrbot_plugin_ygo_card_query", "Wen", "游戏王查卡插件", "1.0.0")
 class CardQueryPlugin(Star):
     def __init__(self, context=None, config: AstrBotConfig = None):
         super().__init__(context, config)
