@@ -45,7 +45,51 @@ class CardQueryPlugin(Star):
         logger.info("发送查询结果文本")
         await event.send(event.plain_result(message))
     
-    async def _handle_query_result(self, event: AstrMessageEvent, result: Dict[str, Any], is_tool_call: bool = False):
+    def _get_best_match_card(self, cards: List[Dict], query: str) -> Dict:
+        """根据名称匹配度选择最匹配的卡片"""
+        if not cards:
+            return None
+        if len(cards) == 1:
+            return cards[0]
+        
+        # 清理查询字符串
+        query = query.lower().strip()
+        
+        best_card = cards[0]
+        best_score = 0
+        
+        for card in cards:
+            card_name = card.get('name', '').lower()
+            
+            # 计算匹配分数
+            score = 0
+            
+            # 完全匹配得分最高
+            if card_name == query:
+                score = 1000
+            # 以查询字符串开头
+            elif card_name.startswith(query):
+                score = 900 + len(query) / len(card_name) * 100
+            # 包含查询字符串
+            elif query in card_name:
+                score = 800 + len(query) / len(card_name) * 100
+            # 计算相似度（字符匹配数）
+            else:
+                # 计算有多少个字符匹配
+                matches = sum(1 for c in query if c in card_name)
+                score = matches / len(query) * 500
+            
+            # 名称越短，匹配度越高（加分）
+            score += max(0, 50 - len(card_name))
+            
+            if score > best_score:
+                best_score = score
+                best_card = card
+        
+        logger.info(f"最佳匹配卡片: {best_card['name']} (匹配分数: {best_score:.2f})")
+        return best_card
+    
+    async def _handle_query_result(self, event: AstrMessageEvent, result: Dict[str, Any], is_tool_call: bool = False, query: str = ""):
         """处理查询结果并发送响应"""
         # 处理查询失败的情况
         if result["status"] != "success":
@@ -60,6 +104,22 @@ class CardQueryPlugin(Star):
             no_result_message = "⚠️ 未找到与查询条件相关的卡片"
             await self._send_text_message(event, no_result_message)
             return no_result_message
+        
+        # 获取查询字符串（如果不是工具调用）
+        if not is_tool_call and not query:
+            message_text = event.get_message_str().strip()
+            parts = message_text.split() if message_text else []
+            if len(parts) > 1:
+                query = " ".join(parts[1:])
+        
+        # 如果有多张卡片，选择匹配度最高的
+        if result["count"] > 1 and query:
+            logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
+            best_card = self._get_best_match_card(result["results"], query)
+            # 替换结果列表为最佳匹配
+            result["results"] = [best_card]
+            result["count"] = 1
+            logger.info(f"选择最佳匹配卡片: {best_card['name']}")
         
         # 处理有结果的情况
         if result["count"] == 1:
@@ -231,7 +291,7 @@ class CardQueryPlugin(Star):
         try:
             result = self.core.query_card(sql)
             logger.info(f"查询结果: status={result['status']}, count={result['count']}")
-            await self._handle_query_result(event, result)
+            await self._handle_query_result(event, result, query=query)
         except Exception as e:
             error_message = str(e)
             logger.error(f"查询出错: {error_message}")
