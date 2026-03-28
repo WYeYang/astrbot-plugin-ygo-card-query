@@ -3,4 +3,4 @@ display_name: 游戏王自然语言查卡
 desc: 一个基于自然语言的游戏王卡片查询插件，支持通过自然语言描述查询卡片信息，并自动更新游戏王卡片数据库
 version: 1.0.0
 author: Wen
-repo: https://github.com/Noctfom/astrbot-plugin-ygo-card-query
+repo: https://github.com/WYeYang/astrbot-plugin-ygo-card-query
