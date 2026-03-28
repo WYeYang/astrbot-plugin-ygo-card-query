@@ -185,7 +185,11 @@ class CardQueryCore:
         results = []
         
         if not os.path.exists(cdb_path):
-            # 数据库文件不存在，抛出异常
+            # 数据库文件不存在，先打印路径信息，然后抛出异常
+            logger.error(f"数据库文件不存在: {cdb_path}")
+            logger.error(f"数据目录: {self.data_dir}")
+            logger.error(f"数据库目录: {self.db_dir}")
+            logger.error(f"完整路径: {cdb_path}")
             raise Exception(f"数据库文件不存在: {cdb_path}\n请先使用命令 `/更新卡片数据库` 或 `/update_database` 下载数据库")
         
         try:
