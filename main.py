@@ -150,14 +150,16 @@ class CardQueryPlugin(Star):
                 response += f"属性: {first_card['attribute']}\n"
             if "attack" in first_card:
                 response += f"攻击力: {first_card['attack']}\n"
-            if "defense" in first_card:
+            # 链接怪兽没有防御力
+            if "defense" in first_card and "link" not in first_card:
                 response += f"防御力: {first_card['defense']}\n"
-            if "level" in first_card:
-                response += f"等级: {first_card['level']}\n"
-            if "rank" in first_card:
-                response += f"阶级: {first_card['rank']}\n"
+            # 根据卡片类型显示相应的字段
             if "link" in first_card:
                 response += f"链接: {first_card['link']}\n"
+            elif "rank" in first_card:
+                response += f"阶级: {first_card['rank']}\n"
+            elif "level" in first_card:
+                response += f"等级: {first_card['level']}\n"
             if "description" in first_card:
                 response += f"效果: {first_card['description']}\n"
             
@@ -201,17 +203,19 @@ class CardQueryPlugin(Star):
                 card_info += f"类型：{card['type']}\n"
                 if "attribute" in card:
                     card_info += f"属性：{card['attribute']}\n"
-                if "level" in card:
-                    card_info += f"等级：{card['level']}\n"
-                if "rank" in card:
-                    card_info += f"阶级：{card['rank']}\n"
+                # 根据卡片类型显示相应的字段
                 if "link" in card:
                     card_info += f"链接：{card['link']}\n"
+                elif "rank" in card:
+                    card_info += f"阶级：{card['rank']}\n"
+                elif "level" in card:
+                    card_info += f"等级：{card['level']}\n"
                 if "race" in card:
                     card_info += f"种族：{card['race']}\n"
                 if "attack" in card:
                     card_info += f"攻击力：{card['attack']}\n"
-                if "defense" in card:
+                # 链接怪兽没有防御力
+                if "defense" in card and "link" not in card:
                     card_info += f"防御力：{card['defense']}\n"
                 if "description" in card:
                     card_info += f"效果：{card['description']}\n"
