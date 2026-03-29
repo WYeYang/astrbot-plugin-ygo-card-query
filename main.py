@@ -150,8 +150,7 @@ class CardQueryPlugin(Star):
                 response += f"属性: {first_card['attribute']}\n"
             if "attack" in first_card:
                 response += f"攻击力: {first_card['attack']}\n"
-            # 链接怪兽没有防御力
-            if "defense" in first_card and "link" not in first_card:
+            if "defense" in first_card:
                 response += f"防御力: {first_card['defense']}\n"
             # 根据卡片类型显示相应的字段
             if "link" in first_card:
@@ -214,8 +213,7 @@ class CardQueryPlugin(Star):
                     card_info += f"种族：{card['race']}\n"
                 if "attack" in card:
                     card_info += f"攻击力：{card['attack']}\n"
-                # 链接怪兽没有防御力
-                if "defense" in card and "link" not in card:
+                if "defense" in card:
                     card_info += f"防御力：{card['defense']}\n"
                 if "description" in card:
                     card_info += f"效果：{card['description']}\n"

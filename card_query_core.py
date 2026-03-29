@@ -233,16 +233,7 @@ class CardQueryCore:
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
                 
-                # 根据卡片类型确定等级/阶级/链接数
-                level_info = {}
-                if card_type & 64:  # XYZ怪兽（超量）
-                    level_info["rank"] = level
-                elif card_type & 128:  # 连接怪兽
-                    level_info["link"] = level
-                else:  # 其他怪兽
-                    level_info["level"] = level
-                
-                # 构建卡片信息，链接怪兽没有防御力
+                # 构建卡片信息，根据卡片类型设置不同字段
                 card_info_base = {
                     "id": card_id,
                     "name": name,
@@ -253,14 +244,23 @@ class CardQueryCore:
                     "description": desc,
                 }
                 
+                # 只有普通怪兽才有等级
+                if not (card_type & 64) and not (card_type & 128):
+                    card_info_base["level"] = level
+                
                 # 只有非链接怪兽才有防御力
                 if not (card_type & 128):
                     card_info_base["defense"] = defense
                 
-                card = {
-                    **card_info_base,
-                    **level_info
-                }
+                # XYZ怪兽有阶级
+                if card_type & 64:
+                    card_info_base["rank"] = level
+                
+                # 连接怪兽有链接数
+                if card_type & 128:
+                    card_info_base["link"] = level
+                
+                card = card_info_base
                 results.append(card)
             
             conn.close()
