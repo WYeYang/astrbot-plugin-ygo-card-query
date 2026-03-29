@@ -225,6 +225,7 @@ class CardQueryPlugin(Star):
         - SELECT * FROM cards WHERE name LIKE '%青眼白龙%' （错误：没有 cards 表）
         - SELECT name FROM texts （错误：缺少必要字段）
         - SELECT d.id, t.name FROM datas d （错误：没有 JOIN texts 表）
+        - SELECT id, name, type, attribute, level, race, atk, def, desc FROM datas JOIN texts ON datas.id = texts.id （错误：id 列名冲突）
         
         2. 查询攻击力大于3000的怪兽：
            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
