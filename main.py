@@ -164,7 +164,9 @@ class CardQueryPlugin(Star):
         # 处理工具调用的返回信息
         if is_tool_call:
             if result["count"] == 1:
-                return "查询成功！已找到相关卡片信息。请不要再重复查询相同内容。"
+                # 只返回卡名给 AI，不要返回完整信息
+                card_name = result["results"][0]["name"]
+                return f"查询成功！找到卡片：{card_name}。请不要再继续调用查询工具。"
             else:
                 # 有多张卡片，返回前三张卡片名称
                 top_cards = result["results"][:3]
@@ -174,7 +176,7 @@ class CardQueryPlugin(Star):
                     extra_info += f" 共找到 {result['count']} 张卡片。请提供更多条件以缩小查询范围。"
                 else:
                     extra_info += "。请提供更多条件以缩小查询范围。"
-                extra_info += " 请不要再重复查询相同内容。"
+                extra_info += " 请不要再继续调用查询工具。"
                 return extra_info
         else:
             return "查询完成"
