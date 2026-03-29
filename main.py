@@ -93,7 +93,7 @@ class CardQueryPlugin(Star):
         if result["status"] != "success":
             error_message = result.get('message', '未知错误')
             logger.error(f"查询出错: {error_message}")
-            await self._send_text_message(event, f"❌ 查询出错: {error_message}")
+            # 只返回错误信息给工具调用，不向用户发送消息
             return f"查询出错: {error_message}"
         
         # 处理无结果的情况
