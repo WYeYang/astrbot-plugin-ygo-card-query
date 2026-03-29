@@ -141,6 +141,10 @@ class CardQueryPlugin(Star):
                 response += f"防御力: {first_card['defense']}\n"
             if "level" in first_card:
                 response += f"等级: {first_card['level']}\n"
+            if "rank" in first_card:
+                response += f"阶级: {first_card['rank']}\n"
+            if "link" in first_card:
+                response += f"链接: {first_card['link']}\n"
             if "description" in first_card:
                 response += f"效果: {first_card['description']}\n"
             
@@ -186,6 +190,10 @@ class CardQueryPlugin(Star):
                     card_info += f"属性：{card['attribute']}\n"
                 if "level" in card:
                     card_info += f"等级：{card['level']}\n"
+                if "rank" in card:
+                    card_info += f"阶级：{card['rank']}\n"
+                if "link" in card:
+                    card_info += f"链接：{card['link']}\n"
                 if "race" in card:
                     card_info += f"种族：{card['race']}\n"
                 if "attack" in card:

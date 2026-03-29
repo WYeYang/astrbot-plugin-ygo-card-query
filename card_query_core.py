@@ -233,16 +233,25 @@ class CardQueryCore:
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
                 
+                # 根据卡片类型确定等级/阶级/链接数
+                level_info = {}
+                if card_type & 64:  # XYZ怪兽
+                    level_info["rank"] = level
+                elif card_type & 128:  # 连接怪兽
+                    level_info["link"] = level
+                else:  # 其他怪兽
+                    level_info["level"] = level
+                
                 card = {
                     "id": card_id,
                     "name": name,
                     "type": card_type_str,
                     "attribute": attribute_str,
-                    "level": level,
                     "race": race,
                     "attack": atk,
                     "defense": defense,
-                    "description": desc
+                    "description": desc,
+                    **level_info
                 }
                 results.append(card)
             
