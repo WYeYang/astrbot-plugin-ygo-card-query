@@ -181,7 +181,13 @@ class CardQueryCore:
         logger.info("开始查询，执行SQL查询...")
         
         # 尝试从SQLite数据库直接查询
+        # 首先尝试在locales/zh-CN/目录查找（标准位置）
         cdb_path = os.path.join(self.db_dir, "locales", "zh-CN", "cards.cdb")
+        
+        # 如果标准位置不存在，尝试在根目录查找
+        if not os.path.exists(cdb_path):
+            cdb_path = os.path.join(self.db_dir, "cards.cdb")
+        
         results = []
         
         if not os.path.exists(cdb_path):
@@ -194,6 +200,8 @@ class CardQueryCore:
         
         try:
             conn = sqlite3.connect(cdb_path)
+            # 设置row_factory为Row，这样可以通过列名访问
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
             # 执行传入的SQL查询
@@ -258,77 +266,49 @@ class CardQueryCore:
             }
             
             for row in query_results:
-                # 处理不同长度的查询结果
-                if len(row) >= 10:
-                    # 完整的查询结果
-                    card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = row
-                elif len(row) >= 13:
-                    # 处理 d.*, t.name, t.desc 格式的查询
-                    # 假设 datas 表的列顺序是: id, ot, alias, setcode, type, atk, def, level, race, attribute, category
-                    # 然后是 t.name, t.desc
-                    card_id = row[0]
-                    ot = row[1]
-                    card_type = row[4]
-                    atk = row[5]
-                    defense = row[6]
-                    level = row[7]
-                    race = row[8]
-                    attribute = row[9]
-                    name = row[11]
-                    desc = row[12]
-                elif len(row) == 8:
-                    # 处理 AI 常用的格式: SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def
-                    card_id, name, card_type, attribute, level, race, atk, defense = row
-                    # 重新查询完整的卡片信息
-                    try:
-                        full_query = f"""
-                            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
-                            FROM datas d 
-                            JOIN texts t ON d.id = t.id
-                            WHERE d.id = ?
-                        """
-                        cursor.execute(full_query, (card_id,))
-                        full_row = cursor.fetchone()
-                        if full_row:
-                            card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = full_row
-                        else:
-                            # 如果查询失败，使用默认值
-                            ot = 3  # 默认 OCG|TCG
-                            desc = ""
-                    except Exception as e:
-                        logger.error(f"查询完整卡片信息失败: {e}")
-                        # 使用默认值
-                        ot = 3  # 默认 OCG|TCG
-                        desc = ""
-                elif len(row) == 7:
-                    # 处理 AI 常用的格式: SELECT d.id, t.name, d.atk, d.def, d.level, d.race, d.attribute
-                    card_id, name, atk, defense, level, race, attribute = row
-                    # 重新查询完整的卡片信息
-                    try:
-                        full_query = f"""
-                            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
-                            FROM datas d 
-                            JOIN texts t ON d.id = t.id
-                            WHERE d.id = ?
-                        """
-                        cursor.execute(full_query, (card_id,))
-                        full_row = cursor.fetchone()
-                        if full_row:
-                            card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = full_row
-                        else:
-                            # 如果查询失败，使用默认值
-                            ot = 3  # 默认 OCG|TCG
-                            card_type = 1  # 默认怪兽卡
-                            desc = ""
-                    except Exception as e:
-                        logger.error(f"查询完整卡片信息失败: {e}")
-                        # 使用默认值
-                        ot = 3  # 默认 OCG|TCG
-                        card_type = 1  # 默认怪兽卡
-                        desc = ""
-                else:
-                    # 无法处理的格式
+                # 转换为字典
+                row_dict = dict(row)
+                
+                # 检查是否包含id字段
+                if 'id' not in row_dict:
+                    # 跳过缺少id字段的记录
                     continue
+                
+                # 获取卡片ID
+                card_id = row_dict.get('id')
+                
+                # 重新查询完整的卡片信息，确保所有字段都存在
+                try:
+                    full_query = f"""
+                        SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
+                        FROM datas d 
+                        JOIN texts t ON d.id = t.id
+                        WHERE d.id = ?
+                    """
+                    cursor.execute(full_query, (card_id,))
+                    full_row = cursor.fetchone()
+                    if full_row:
+                        # 使用完整查询的结果
+                        row_dict = dict(full_row)
+                    else:
+                        # 如果查询失败，跳过此卡片
+                        continue
+                except Exception as e:
+                    logger.error(f"查询完整卡片信息失败: {e}")
+                    # 如果查询失败，跳过此卡片
+                    continue
+                
+                # 从字典中获取字段
+                card_id = row_dict.get('id')
+                name = row_dict.get('name', '')
+                card_type = row_dict.get('type', 0)
+                attribute = row_dict.get('attribute', 0)
+                level = row_dict.get('level', 0)
+                race = row_dict.get('race', 0)
+                atk = row_dict.get('atk', 0)
+                defense = row_dict.get('def', 0)
+                desc = row_dict.get('desc', '')
+                ot = row_dict.get('ot', 3)
                 
                 # 解析卡片类型
                 card_type_str = "怪兽"
