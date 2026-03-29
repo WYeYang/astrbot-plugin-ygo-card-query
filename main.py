@@ -271,8 +271,8 @@ class CardQueryPlugin(Star):
         except Exception as e:
             error_message = str(e)
             logger.error(f"查询出错: {error_message}")
-            await event.send(event.plain_result(f"❌ 查询出错: {error_message}"))
-            return "查询完成"
+            # 只返回错误信息给工具调用，不向用户发送消息
+            return f"查询出错: {error_message}"
     
     @filter.command("查卡", alias={"/查卡"})
     async def handle_cha_ka(self, event: AstrMessageEvent):
