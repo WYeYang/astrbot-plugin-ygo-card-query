@@ -189,7 +189,13 @@ class CardQueryPlugin(Star):
             sql(string): SQL查询语句，必须包含 id, name, type, attribute, level, race, atk, def, desc 字段，必须使用 JOIN 语句连接 datas 和 texts 表，必须使用表别名（如 d.id, t.name）避免列名冲突
 
         示例：
-        SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
+        - 按名称：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
+        - 按属性：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 16 （光属性）
+        - 按种族：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192 （龙族）
+        - 按等级：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8 （8星）
+        - 按攻击力：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
+        - 按效果：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
+        - 按卡片类型：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 2 （魔法卡）
         """
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
         
