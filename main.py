@@ -55,7 +55,7 @@ class CardQueryPlugin(Star):
         
         info += f"类型{separator} {card['type']}\n"
         if "ocg_tcg" in card:
-            info += f"OCG/TCG{separator} {card['ocg_tcg']}\n"
+            info += f" {card['ocg_tcg']}\n"
         if "tuner" in card:
             info += f"调整{separator} 是\n"
         
