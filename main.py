@@ -11,6 +11,7 @@ from astrbot.core.platform.astr_message_event import AstrMessageEvent
 import astrbot.api.message_components as Comp
 from astrbot.api.all import logger
 from typing import Dict, Any, List
+import random
 
 @register("astrbot_plugin_ygo_card_query", "Wen", "游戏王查卡插件", "1.0.0")
 class CardQueryPlugin(Star):
@@ -78,8 +79,8 @@ class CardQueryPlugin(Star):
                     matches = sum(1 for c in query if c in card_name)
                     score = matches / len(query) * 500
             else:
-                # 如果查询字符串为空，默认选择第一张卡片
-                score = 1000
+                # 如果查询字符串为空，随机选择一张卡片
+                score = random.randint(900, 1100)
             
             # 名称越短，匹配度越高（加分）
             score += max(0, 50 - len(card_name))
