@@ -125,9 +125,9 @@ class CardQueryCore:
                 logger.info("正在执行 git clone，这可能需要一些时间...")
                 
                 # 首次克隆数据库
-                # 直接使用 GitHub 原始地址
+                # 使用加速镜像
                 result = await self._execute_git_command(
-                    ["git", "clone", "--progress", "https://github.com/moecube/ygopro-database.git", "ygopro-database"],
+                    ["git", "clone", "--progress", "https://gitee.com/moecube/ygopro-database.git", "ygopro-database"],
                     cwd=self.data_dir,
                     description="git clone"
                 )
