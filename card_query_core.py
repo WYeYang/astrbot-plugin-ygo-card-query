@@ -225,33 +225,53 @@ class CardQueryCore:
                 
                 # 解析卡片类型
                 card_type_str = "怪兽"
-                if card_type & 2:
-                    card_type_str = "魔法"
-                elif card_type & 4:
-                    card_type_str = "陷阱"
                 
-                # 构建详细的怪兽子类型
-                monster_subtypes = []
-                if card_type & 1:  # 怪兽卡
+                # 构建详细的子类型
+                subtypes = []
+                
+                if card_type & 2:  # 魔法卡
+                    if card_type & 0x80:  # 仪式
+                        subtypes.append("仪式")
+                    elif card_type & 0x10000:  # 速攻
+                        subtypes.append("速攻")
+                    elif card_type & 0x20000:  # 永续
+                        subtypes.append("永续")
+                    elif card_type & 0x40000:  # 装备
+                        subtypes.append("装备")
+                    elif card_type & 0x80000:  # 场地
+                        subtypes.append("场地")
+                    else:  # 普通魔法
+                        subtypes.append("通常")
+                    card_type_str = " ".join(subtypes) + "魔法"
+                    
+                elif card_type & 4:  # 陷阱卡
+                    if card_type & 0x100000:  # 反击
+                        subtypes.append("反击")
+                    elif card_type & 0x20000:  # 永续
+                        subtypes.append("永续")
+                    else:  # 普通陷阱
+                        subtypes.append("通常")
+                    card_type_str = " ".join(subtypes) + "陷阱"
+                    
+                elif card_type & 1:  # 怪兽卡
                     if card_type & 0x4000000:  # 连接
-                        monster_subtypes.append("连接")
+                        subtypes.append("连接")
                     elif card_type & 0x800000:  # XYZ
-                        monster_subtypes.append("XYZ")
+                        subtypes.append("XYZ")
                     elif card_type & 8192:  # 同调
-                        monster_subtypes.append("同调")
+                        subtypes.append("同调")
                     elif card_type & 64:  # 融合
-                        monster_subtypes.append("融合")
+                        subtypes.append("融合")
                     
                     if card_type & 0x1000000:  # 灵摆
-                        monster_subtypes.append("灵摆")
+                        subtypes.append("灵摆")
                     
                     if card_type & 32:  # 效果
-                        monster_subtypes.append("效果")
+                        subtypes.append("效果")
                     elif not (card_type & 64) and not (card_type & 8192) and not (card_type & 0x800000) and not (card_type & 0x4000000):  # 非特殊召唤怪兽
-                        monster_subtypes.append("通常")
-                
-                if monster_subtypes:
-                    card_type_str = " ".join(monster_subtypes) + "怪兽"
+                        subtypes.append("通常")
+                    
+                    card_type_str = " ".join(subtypes) + "怪兽"
                 
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
