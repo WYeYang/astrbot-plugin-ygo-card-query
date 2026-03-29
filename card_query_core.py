@@ -242,8 +242,8 @@ class CardQueryCore:
                         subtypes.append("场地")
                     else:  # 普通魔法
                         subtypes.append("通常")
-                    card_type_str = " ".join(subtypes) + "魔法"
-                    
+                    card_type_str = "|".join(subtypes) + "|魔法"
+
                 elif card_type & 4:  # 陷阱卡
                     if card_type & 0x100000:  # 反击
                         subtypes.append("反击")
@@ -251,8 +251,8 @@ class CardQueryCore:
                         subtypes.append("永续")
                     else:  # 普通陷阱
                         subtypes.append("通常")
-                    card_type_str = " ".join(subtypes) + "陷阱"
-                    
+                    card_type_str = "|".join(subtypes) + "|陷阱"
+
                 elif card_type & 1:  # 怪兽卡
                     if card_type & 0x4000000:  # 连接
                         subtypes.append("连接")
@@ -262,16 +262,16 @@ class CardQueryCore:
                         subtypes.append("同调")
                     elif card_type & 64:  # 融合
                         subtypes.append("融合")
-                    
+
                     if card_type & 0x1000000:  # 灵摆
                         subtypes.append("灵摆")
-                    
+
                     if card_type & 32:  # 效果
                         subtypes.append("效果")
                     elif not (card_type & 64) and not (card_type & 8192) and not (card_type & 0x800000) and not (card_type & 0x4000000):  # 非特殊召唤怪兽
                         subtypes.append("通常")
-                    
-                    card_type_str = " ".join(subtypes) + "怪兽"
+
+                    card_type_str = "|".join(subtypes) + "|怪兽"
                 
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
