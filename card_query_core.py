@@ -200,7 +200,7 @@ class CardQueryCore:
             if not sql:
                 # 默认查询
                 sql = """
-                    SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
+                    SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
                     FROM datas d 
                     JOIN texts t ON d.id = t.id
                 """
@@ -248,11 +248,23 @@ class CardQueryCore:
                 8388608: "幻龙"
             }
             
+            ot_map = {
+                1: "OCG",
+                2: "TCG",
+                3: "OCG|TCG",
+                4: "自定义",
+                9: "OCG|TCG",
+                11: "OCG|TCG"
+            }
+            
             for row in query_results:
-                card_id, name, card_type, attribute, level, race, atk, defense, desc = row
+                card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = row
                 
                 # 解析卡片类型
                 card_type_str = "怪兽"
+                
+                # 解析调整信息
+                ot_str = ot_map.get(ot, "未知")
                 
                 # 构建详细的子类型
                 subtypes = []
@@ -310,6 +322,7 @@ class CardQueryCore:
                     "id": card_id,
                     "name": name,
                     "type": card_type_str,
+                    "ot": ot_str,
                     "attribute": attribute_str,
                     "race": race_str,
                     "attack": atk,

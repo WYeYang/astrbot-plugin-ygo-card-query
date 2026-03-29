@@ -146,12 +146,16 @@ class CardQueryPlugin(Star):
             # 构建回复消息
             response = f"🔍 查询结果: {first_card['name']}\n"
             response += f"类型: {first_card['type']}\n"
+            if "ot" in first_card:
+                response += f"调整: {first_card['ot']}\n"
             
             # 只有怪兽卡才显示属性、攻击、防御、等级等信息
             is_monster = "怪兽" in first_card.get('type', '')
             if is_monster:
                 if "attribute" in first_card:
                     response += f"属性: {first_card['attribute']}\n"
+                if "race" in first_card:
+                    response += f"种族: {first_card['race']}\n"
                 if "attack" in first_card:
                     response += f"攻击力: {first_card['attack']}\n"
                 if "defense" in first_card:
@@ -205,12 +209,16 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 card_info = f"找到卡片：{card['name']}\n"
                 card_info += f"类型：{card['type']}\n"
+                if "ot" in card:
+                    card_info += f"调整：{card['ot']}\n"
                 
                 # 只有怪兽卡才显示属性、攻击、防御、等级等信息
                 is_monster = "怪兽" in card.get('type', '')
                 if is_monster:
                     if "attribute" in card:
                         card_info += f"属性：{card['attribute']}\n"
+                    if "race" in card:
+                        card_info += f"种族：{card['race']}\n"
                     # 根据卡片类型显示相应的字段
                     if "link" in card:
                         card_info += f"链接：{card['link']}\n"
@@ -218,8 +226,6 @@ class CardQueryPlugin(Star):
                         card_info += f"阶级：{card['rank']}\n"
                     elif "level" in card:
                         card_info += f"等级：{card['level']}\n"
-                    if "race" in card:
-                        card_info += f"种族：{card['race']}\n"
                     if "attack" in card:
                         card_info += f"攻击力：{card['attack']}\n"
                     if "defense" in card:
