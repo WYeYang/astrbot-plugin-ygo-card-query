@@ -179,6 +179,37 @@ class CardQueryPlugin(Star):
             result["count"] = 1
             logger.info(f"选择最佳匹配卡片: {best_card['name']}")
         
+        # 处理用户查询的返回信息（无论是工具调用还是直接查询）
+        if result["count"] == 1:
+            # 只有一张卡片，发送卡片信息和图片
+            first_card = result["results"][0]
+            logger.info(f"返回第一张卡片: {first_card['name']}")
+            
+            # 构建回复消息
+            response = self._build_card_info(first_card, is_ai=False)
+            
+            if result.get("note"):
+                response += f"\n💡 {result['note']}"
+            
+            # 尝试发送图片和文本
+            card_id = first_card.get("id")
+            if card_id:
+                image_url = self.core.get_card_image_url(card_id)
+                if image_url:
+                    try:
+                        chain = []
+                        chain.append(Comp.Image.fromURL(image_url))
+                        chain.append(Comp.Plain(response))
+                        logger.info(f"发送卡片图片和文本: {first_card['name']}")
+                        await event.send(event.chain_result(chain))
+                    except Exception as e:
+                        logger.error(f"发送图片失败: {e}")
+                        await self._send_text_message(event, response)
+                else:
+                    await self._send_text_message(event, response)
+            else:
+                await self._send_text_message(event, response)
+        
         # 处理工具调用的返回信息
         if is_tool_call:
             if result["count"] == 1:
@@ -200,36 +231,6 @@ class CardQueryPlugin(Star):
                 extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级/阶级/链接数或攻击力范围。"
                 return extra_info
         else:
-            # 处理用户查询的返回信息
-            if result["count"] == 1:
-                # 只有一张卡片，发送卡片信息和图片
-                first_card = result["results"][0]
-                logger.info(f"返回第一张卡片: {first_card['name']}")
-                
-                # 构建回复消息
-                response = self._build_card_info(first_card, is_ai=False)
-                
-                if result.get("note"):
-                    response += f"\n💡 {result['note']}"
-                
-                # 尝试发送图片和文本
-                card_id = first_card.get("id")
-                if card_id:
-                    image_url = self.core.get_card_image_url(card_id)
-                    if image_url:
-                        try:
-                            chain = []
-                            chain.append(Comp.Image.fromURL(image_url))
-                            chain.append(Comp.Plain(response))
-                            logger.info(f"发送卡片图片和文本: {first_card['name']}")
-                            await event.send(event.chain_result(chain))
-                        except Exception as e:
-                            logger.error(f"发送图片失败: {e}")
-                            await self._send_text_message(event, response)
-                    else:
-                        await self._send_text_message(event, response)
-                else:
-                    await self._send_text_message(event, response)
             return "查询完成"
     
     @filter.llm_tool(name="query_card")

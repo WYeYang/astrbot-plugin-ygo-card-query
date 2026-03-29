@@ -279,10 +279,29 @@ class CardQueryCore:
                 elif len(row) == 7:
                     # 处理 AI 常用的格式: SELECT d.id, t.name, d.atk, d.def, d.level, d.race, d.attribute
                     card_id, name, atk, defense, level, race, attribute = row
-                    # 这些字段需要默认值
-                    ot = 3  # 默认 OCG|TCG
-                    card_type = 1  # 默认怪兽卡
-                    desc = ""
+                    # 重新查询完整的卡片信息
+                    try:
+                        full_query = f"""
+                            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
+                            FROM datas d 
+                            JOIN texts t ON d.id = t.id
+                            WHERE d.id = ?
+                        """
+                        cursor.execute(full_query, (card_id,))
+                        full_row = cursor.fetchone()
+                        if full_row:
+                            card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = full_row
+                        else:
+                            # 如果查询失败，使用默认值
+                            ot = 3  # 默认 OCG|TCG
+                            card_type = 1  # 默认怪兽卡
+                            desc = ""
+                    except Exception as e:
+                        logger.error(f"查询完整卡片信息失败: {e}")
+                        # 使用默认值
+                        ot = 3  # 默认 OCG|TCG
+                        card_type = 1  # 默认怪兽卡
+                        desc = ""
                 else:
                     # 无法处理的格式
                     continue
