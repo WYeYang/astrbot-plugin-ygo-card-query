@@ -189,8 +189,13 @@ class CardQueryPlugin(Star):
         - 用户比较卡片属性（如"找出所有龙族怪兽"）
         - 用户询问卡片效果（如"检索破坏魔法陷阱的卡片"）
 
+        重要注意事项：
+        - 数据库中只有 `datas` 和 `texts` 两个表，**没有 `cards` 表**
+        - 必须使用 JOIN 语句连接 `datas` 和 `texts` 表
+        - 所有查询都必须包含 id, name, type, attribute, level, race, atk, def, desc 字段
+
         Args:
-            sql(string): SQL查询语句，必须包含 id, name, type, attribute, level, race, atk, def, desc 字段
+            sql(string): SQL查询语句，必须包含 id, name, type, attribute, level, race, atk, def, desc 字段，必须使用 JOIN 语句连接 datas 和 texts 表
         
         数据库结构描述：
         - datas表：存储卡片基本信息
@@ -214,6 +219,11 @@ class CardQueryPlugin(Star):
            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
            FROM datas d JOIN texts t ON d.id = t.id
            WHERE t.name LIKE '%青眼白龙%'
+        
+        错误示例（不要这样写）：
+        - SELECT * FROM cards WHERE name LIKE '%青眼白龙%' （错误：没有 cards 表）
+        - SELECT name FROM texts （错误：缺少必要字段）
+        - SELECT d.id, t.name FROM datas d （错误：没有 JOIN texts 表）
         
         2. 查询攻击力大于3000的怪兽：
            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
