@@ -163,10 +163,19 @@ class CardQueryPlugin(Star):
         
         # 处理工具调用的返回信息
         if is_tool_call:
+            # 如果查询参数有名字，返回匹配度最高的一个
+            if result["count"] > 1 and query:
+                logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
+                best_card = self._get_best_match_card(result["results"], query)
+                # 替换结果列表为最佳匹配
+                result["results"] = [best_card]
+                result["count"] = 1
+                logger.info(f"选择最佳匹配卡片: {best_card['name']}")
+            
             if result["count"] == 1:
                 # 返回完整的卡片信息给 AI
                 card = result["results"][0]
-                card_info = f"查询成功！找到卡片：{card['name']}\n"
+                card_info = f"找到卡片：{card['name']}\n"
                 card_info += f"类型：{card['type']}\n"
                 if "attribute" in card:
                     card_info += f"属性：{card['attribute']}\n"
@@ -183,12 +192,17 @@ class CardQueryPlugin(Star):
                 card_info += "请根据以上信息回答用户问题，不要添加额外信息。"
                 return card_info
             else:
-                # 有多张卡片，返回前三张卡片名称
-                top_cards = result["results"][:3]
-                card_names = [card["name"] for card in top_cards]
-                extra_info = f"查询到多张卡片，前三张是：{', '.join(card_names)}"
+                # 大于三张取三张，大于一张有几张取几张
                 if result["count"] > 3:
-                    extra_info += f" 共找到 {result['count']} 张卡片。"
+                    # 大于三张，取前三张
+                    top_cards = result["results"][:3]
+                    card_names = [card["name"] for card in top_cards]
+                    extra_info = f"查询到 {result['count']} 张卡片，显示前3张：{', '.join(card_names)}"
+                else:
+                    # 大于一张但不超过三张，显示所有卡片
+                    all_cards = result["results"]
+                    card_names = [card["name"] for card in all_cards]
+                    extra_info = f"查询到 {result['count']} 张卡片：{', '.join(card_names)}"
                 extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级或攻击力范围。"
                 return extra_info
         else:
@@ -212,10 +226,18 @@ class CardQueryPlugin(Star):
         """
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
         
+        # 从SQL语句中提取查询字符串
+        query = ""
+        import re
+        # 尝试从LIKE子句中提取查询字符串
+        like_match = re.search(r'LIKE\s+["\']%([^%]+)%["\']', sql, re.IGNORECASE)
+        if like_match:
+            query = like_match.group(1).strip()
+        
         try:
             result = self.core.query_card(sql)
             logger.info(f"查询结果: status={result['status']}, count={result['count']}")
-            return await self._handle_query_result(event, result, is_tool_call=True)
+            return await self._handle_query_result(event, result, is_tool_call=True, query=query)
         except Exception as e:
             error_message = str(e)
             logger.error(f"查询出错: {error_message}")
