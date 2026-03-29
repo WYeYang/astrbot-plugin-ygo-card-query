@@ -247,16 +247,35 @@ class CardQueryPlugin(Star):
         """查询游戏王卡片信息。当用户询问任何与游戏王卡片相关的问题时，使用此工具查询数据库获取准确的卡片信息。
 
         Args:
-            sql(string): SQL查询语句。数据库结构：datas表(id,type,attribute,level,race,atk,def)和texts表(id,name,desc)通过id关联。使用JOIN连接两表，用表别名(d.id,t.name)避免冲突。
+            sql(string): SQL查询语句。数据库结构：datas表(id,type,attribute,level,race,atk,def,ot)和texts表(id,name,desc)通过id关联。使用JOIN连接两表，用表别名(d.id,t.name)避免冲突。
+
+        卡片类型标识：
+        - 怪兽卡: d.type & 1
+        - 魔法卡: d.type & 2
+        - 陷阱卡: d.type & 4
+        - 效果怪兽: d.type & 32
+        - 融合怪兽: d.type & 64
+        - 同调怪兽: d.type & 8192
+        - XYZ怪兽: d.type & 0x800000
+        - 连接怪兽: d.type & 0x4000000
+        - 灵摆怪兽: d.type & 0x1000000
+        - 调整怪兽: d.type & 16384
+        - 仪式魔法: d.type & 0x80
+        - 速攻魔法: d.type & 0x10000
+        - 永续魔法: d.type & 0x20000
+        - 装备魔法: d.type & 0x40000
+        - 场地魔法: d.type & 0x80000
+        - 反击陷阱: d.type & 0x100000
 
         示例：
-        - 按名称：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
-        - 按属性：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 16
-        - 按种族：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192
-        - 按等级/阶级/链接：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8
-        - 按攻击力：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
-        - 按效果：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
-        - 按卡片类型：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 2
+        - 按名称：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
+        - 按属性：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 16
+        - 按种族：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192
+        - 按等级/阶级/链接：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8
+        - 按攻击力：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
+        - 按效果：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
+        - 按卡片类型：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 2
+        - 按调整怪兽：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.type & 16384
         """
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
         
