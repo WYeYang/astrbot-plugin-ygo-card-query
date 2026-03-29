@@ -230,6 +230,29 @@ class CardQueryCore:
                 elif card_type & 4:
                     card_type_str = "陷阱"
                 
+                # 构建详细的怪兽子类型
+                monster_subtypes = []
+                if card_type & 1:  # 怪兽卡
+                    if card_type & 0x4000000:  # 连接
+                        monster_subtypes.append("连接")
+                    elif card_type & 0x800000:  # XYZ
+                        monster_subtypes.append("XYZ")
+                    elif card_type & 8192:  # 同调
+                        monster_subtypes.append("同调")
+                    elif card_type & 64:  # 融合
+                        monster_subtypes.append("融合")
+                    
+                    if card_type & 0x1000000:  # 灵摆
+                        monster_subtypes.append("灵摆")
+                    
+                    if card_type & 32:  # 效果
+                        monster_subtypes.append("效果")
+                    elif not (card_type & 64) and not (card_type & 8192) and not (card_type & 0x800000) and not (card_type & 0x4000000):  # 非特殊召唤怪兽
+                        monster_subtypes.append("通常")
+                
+                if monster_subtypes:
+                    card_type_str = " ".join(monster_subtypes) + "怪兽"
+                
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
                 
