@@ -242,15 +242,23 @@ class CardQueryCore:
                 else:  # 其他怪兽
                     level_info["level"] = level
                 
-                card = {
+                # 构建卡片信息，链接怪兽没有防御力
+                card_info_base = {
                     "id": card_id,
                     "name": name,
                     "type": card_type_str,
                     "attribute": attribute_str,
                     "race": race,
                     "attack": atk,
-                    "defense": defense,
                     "description": desc,
+                }
+                
+                # 只有非链接怪兽才有防御力
+                if not (card_type & 128):
+                    card_info_base["defense"] = defense
+                
+                card = {
+                    **card_info_base,
                     **level_info
                 }
                 results.append(card)
