@@ -62,20 +62,24 @@ class CardQueryPlugin(Star):
             # 计算匹配分数
             score = 0
             
-            # 完全匹配得分最高
-            if card_name == query:
-                score = 1000
-            # 以查询字符串开头
-            elif card_name.startswith(query):
-                score = 900 + len(query) / len(card_name) * 100
-            # 包含查询字符串
-            elif query in card_name:
-                score = 800 + len(query) / len(card_name) * 100
-            # 计算相似度（字符匹配数）
+            if query:
+                # 完全匹配得分最高
+                if card_name == query:
+                    score = 1000
+                # 以查询字符串开头
+                elif card_name.startswith(query):
+                    score = 900 + len(query) / len(card_name) * 100
+                # 包含查询字符串
+                elif query in card_name:
+                    score = 800 + len(query) / len(card_name) * 100
+                # 计算相似度（字符匹配数）
+                else:
+                    # 计算有多少个字符匹配
+                    matches = sum(1 for c in query if c in card_name)
+                    score = matches / len(query) * 500
             else:
-                # 计算有多少个字符匹配
-                matches = sum(1 for c in query if c in card_name)
-                score = matches / len(query) * 500
+                # 如果查询字符串为空，默认选择第一张卡片
+                score = 1000
             
             # 名称越短，匹配度越高（加分）
             score += max(0, 50 - len(card_name))
@@ -111,7 +115,7 @@ class CardQueryPlugin(Star):
                 query = " ".join(parts[1:])
         
         # 如果有多张卡片，选择匹配度最高的
-        if result["count"] > 1 and query:
+        if result["count"] > 1:
             logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
             best_card = self._get_best_match_card(result["results"], query)
             # 替换结果列表为最佳匹配
@@ -163,8 +167,8 @@ class CardQueryPlugin(Star):
         
         # 处理工具调用的返回信息
         if is_tool_call:
-            # 如果查询参数有名字，返回匹配度最高的一个
-            if result["count"] > 1 and query:
+            # 如果查询到多张卡片，返回匹配度最高的一个
+            if result["count"] > 1:
                 logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
                 best_card = self._get_best_match_card(result["results"], query)
                 # 替换结果列表为最佳匹配
