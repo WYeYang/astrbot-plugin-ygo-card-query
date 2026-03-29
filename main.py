@@ -183,19 +183,11 @@ class CardQueryPlugin(Star):
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
         """查询游戏王卡片信息。当用户询问任何与游戏王卡片相关的问题时，使用此工具查询数据库获取准确的卡片信息。
 
-        重要规则：
-        - 数据库只有 datas 和 texts 两个表，无 cards 表
-        - 必须使用 JOIN 语句连接两个表：FROM datas d JOIN texts t ON d.id = t.id
-        - 必须包含所有字段：id, name, type, attribute, level, race, atk, def, desc
-        - 必须使用表别名（如 d.id, t.name）避免列名冲突
+        Args:
+            sql(string): SQL查询语句，必须包含 id, name, type, attribute, level, race, atk, def, desc 字段，必须使用 JOIN 语句连接 datas 和 texts 表，必须使用表别名（如 d.id, t.name）避免列名冲突
 
-        使用示例：
-        - 按名称查询：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
-        - 按条件查询：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
-
-        错误示例：
-        - SELECT * FROM cards WHERE name LIKE '%青眼白龙%' （无 cards 表）
-        - SELECT id, name FROM datas （缺少字段，无 JOIN）
+        示例：
+        SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
         """
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
         
