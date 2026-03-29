@@ -57,6 +57,14 @@ class CardQueryPlugin(Star):
         best_card = cards[0]
         best_score = 0
         
+        # 检查是否所有卡片名称都相同
+        all_names_same = True
+        first_name = cards[0].get('name', '').lower()
+        for card in cards:
+            if card.get('name', '').lower() != first_name:
+                all_names_same = False
+                break
+        
         for card in cards:
             card_name = card.get('name', '').lower()
             
@@ -82,6 +90,10 @@ class CardQueryPlugin(Star):
             else:
                 # 如果查询字符串为空，随机选择一张卡片
                 score = random.randint(900, 1100)
+            
+            # 如果所有卡片名称都相同，添加更多随机性
+            if all_names_same:
+                score += random.randint(0, 50)
             
             # 名称越短，匹配度越高（加分）
             score += max(0, 50 - len(card_name))
