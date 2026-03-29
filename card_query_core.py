@@ -246,8 +246,8 @@ class CardQueryCore:
                 
                 # 连接怪兽的类型标识是第26位 (0x4000000)
                 is_link_monster = (card_type & 0x4000000) != 0
-                # XYZ怪兽的类型标识是第6位 (0x40)
-                is_xyz_monster = (card_type & 0x40) != 0
+                # XYZ怪兽的类型标识是第23位 (0x800000)
+                is_xyz_monster = (card_type & 0x800000) != 0
                 
                 # 只有普通怪兽才有等级
                 if not is_xyz_monster and not is_link_monster:
