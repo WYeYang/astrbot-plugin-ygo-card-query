@@ -216,7 +216,7 @@ class CardQueryPlugin(Star):
                     all_cards = result["results"]
                     card_names = [card["name"] for card in all_cards]
                     extra_info = f"查询到 {result['count']} 张卡片：{', '.join(card_names)}"
-                extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级或攻击力范围。"
+                extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级/阶级/链接数或攻击力范围。"
                 return extra_info
         else:
             return "查询完成"
@@ -233,6 +233,8 @@ class CardQueryPlugin(Star):
         - 按属性：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 16 （光属性）
         - 按种族：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192 （龙族）
         - 按等级：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8 （8星）
+        - 按阶级：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 64 AND d.level = 4 （4阶XYZ怪兽）
+        - 按链接数：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 128 AND d.level = 2 （2链接连接怪兽）
         - 按攻击力：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
         - 按效果：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
         - 按卡片类型：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 2 （魔法卡）
