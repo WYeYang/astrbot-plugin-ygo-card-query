@@ -44,6 +44,48 @@ class CardQueryPlugin(Star):
         logger.info("发送查询结果文本")
         await event.send(event.plain_result(message))
     
+    def _build_card_info(self, card: Dict, is_ai: bool = False) -> str:
+        """构建卡片信息"""
+        if is_ai:
+            info = f"找到卡片：{card['name']}\n"
+            separator = "："
+        else:
+            info = f"🔍 查询结果: {card['name']}\n"
+            separator = ":"
+        
+        info += f"类型{separator} {card['type']}\n"
+        if "ocg_tcg" in card:
+            info += f"OCG/TCG{separator} {card['ocg_tcg']}\n"
+        if "tuner" in card:
+            info += f"调整{separator} 是\n"
+        
+        # 只有怪兽卡才显示属性、攻击、防御、等级等信息
+        is_monster = "怪兽" in card.get('type', '')
+        if is_monster:
+            if "attribute" in card:
+                info += f"属性{separator} {card['attribute']}\n"
+            if "race" in card:
+                info += f"种族{separator} {card['race']}\n"
+            if "attack" in card:
+                info += f"攻击力{separator} {card['attack']}\n"
+            if "defense" in card:
+                info += f"防御力{separator} {card['defense']}\n"
+            # 根据卡片类型显示相应的字段
+            if "link" in card:
+                info += f"链接{separator} {card['link']}\n"
+            elif "rank" in card:
+                info += f"阶级{separator} {card['rank']}\n"
+            elif "level" in card:
+                info += f"等级{separator} {card['level']}\n"
+        
+        if "description" in card:
+            info += f"效果{separator} {card['description']}\n"
+        
+        if is_ai:
+            info += "请根据以上信息回答用户问题，不要添加额外信息。"
+        
+        return info
+
     def _get_best_match_card(self, cards: List[Dict], query: str) -> Dict:
         """根据名称匹配度选择最匹配的卡片"""
         if not cards:
@@ -144,34 +186,7 @@ class CardQueryPlugin(Star):
             logger.info(f"返回第一张卡片: {first_card['name']}")
             
             # 构建回复消息
-            response = f"🔍 查询结果: {first_card['name']}\n"
-            response += f"类型: {first_card['type']}\n"
-            if "ocg_tcg" in first_card:
-                response += f"OCG/TCG: {first_card['ocg_tcg']}\n"
-            if "tuner" in first_card:
-                response += f"调整: 是\n"
-            
-            # 只有怪兽卡才显示属性、攻击、防御、等级等信息
-            is_monster = "怪兽" in first_card.get('type', '')
-            if is_monster:
-                if "attribute" in first_card:
-                    response += f"属性: {first_card['attribute']}\n"
-                if "race" in first_card:
-                    response += f"种族: {first_card['race']}\n"
-                if "attack" in first_card:
-                    response += f"攻击力: {first_card['attack']}\n"
-                if "defense" in first_card:
-                    response += f"防御力: {first_card['defense']}\n"
-                # 根据卡片类型显示相应的字段
-                if "link" in first_card:
-                    response += f"链接: {first_card['link']}\n"
-                elif "rank" in first_card:
-                    response += f"阶级: {first_card['rank']}\n"
-                elif "level" in first_card:
-                    response += f"等级: {first_card['level']}\n"
-            
-            if "description" in first_card:
-                response += f"效果: {first_card['description']}\n"
+            response = self._build_card_info(first_card, is_ai=False)
             
             if result.get("note"):
                 response += f"\n💡 {result['note']}"
@@ -209,36 +224,7 @@ class CardQueryPlugin(Star):
             if result["count"] == 1:
                 # 返回完整的卡片信息给 AI
                 card = result["results"][0]
-                card_info = f"找到卡片：{card['name']}\n"
-                card_info += f"类型：{card['type']}\n"
-                if "ocg_tcg" in card:
-                    card_info += f"OCG/TCG：{card['ocg_tcg']}\n"
-                if "tuner" in card:
-                    card_info += f"调整：是\n"
-                
-                # 只有怪兽卡才显示属性、攻击、防御、等级等信息
-                is_monster = "怪兽" in card.get('type', '')
-                if is_monster:
-                    if "attribute" in card:
-                        card_info += f"属性：{card['attribute']}\n"
-                    if "race" in card:
-                        card_info += f"种族：{card['race']}\n"
-                    # 根据卡片类型显示相应的字段
-                    if "link" in card:
-                        card_info += f"链接：{card['link']}\n"
-                    elif "rank" in card:
-                        card_info += f"阶级：{card['rank']}\n"
-                    elif "level" in card:
-                        card_info += f"等级：{card['level']}\n"
-                    if "attack" in card:
-                        card_info += f"攻击力：{card['attack']}\n"
-                    if "defense" in card:
-                        card_info += f"防御力：{card['defense']}\n"
-                
-                if "description" in card:
-                    card_info += f"效果：{card['description']}\n"
-                card_info += "请根据以上信息回答用户问题，不要添加额外信息。"
-                return card_info
+                return self._build_card_info(card, is_ai=True)
             else:
                 # 大于三张取三张，大于一张有几张取几张
                 if result["count"] > 3:
