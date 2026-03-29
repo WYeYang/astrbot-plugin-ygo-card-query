@@ -244,20 +244,25 @@ class CardQueryCore:
                     "description": desc,
                 }
                 
+                # 连接怪兽的类型标识是第26位 (0x4000000)
+                is_link_monster = (card_type & 0x4000000) != 0
+                # XYZ怪兽的类型标识是第6位 (0x40)
+                is_xyz_monster = (card_type & 0x40) != 0
+                
                 # 只有普通怪兽才有等级
-                if not (card_type & 64) and not (card_type & 128):
+                if not is_xyz_monster and not is_link_monster:
                     card_info_base["level"] = level
                 
                 # 只有非链接怪兽才有防御力
-                if not (card_type & 128):
+                if not is_link_monster:
                     card_info_base["defense"] = defense
                 
                 # XYZ怪兽有阶级
-                if card_type & 64:
+                if is_xyz_monster:
                     card_info_base["rank"] = level
                 
                 # 连接怪兽有链接数
-                if card_type & 128:
+                if is_link_monster:
                     card_info_base["link"] = level
                 
                 card = card_info_base
