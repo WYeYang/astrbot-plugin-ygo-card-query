@@ -183,84 +183,19 @@ class CardQueryPlugin(Star):
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
         """查询游戏王卡片信息。当用户询问任何与游戏王卡片相关的问题时，使用此工具查询数据库获取准确的卡片信息。
 
-        使用场景：
-        - 用户询问特定卡片的信息（如"青眼白龙是什么效果"）
-        - 用户询问符合某些条件的卡片（如"攻击力3000以上的怪兽有哪些"）
-        - 用户询问某系列卡片（如"黑魔导系列有哪些卡"）
-        - 用户比较卡片属性（如"找出所有龙族怪兽"）
-        - 用户询问卡片效果（如"检索破坏魔法陷阱的卡片"）
+        重要规则：
+        - 数据库只有 datas 和 texts 两个表，无 cards 表
+        - 必须使用 JOIN 语句连接两个表：FROM datas d JOIN texts t ON d.id = t.id
+        - 必须包含所有字段：id, name, type, attribute, level, race, atk, def, desc
+        - 必须使用表别名（如 d.id, t.name）避免列名冲突
 
-        重要注意事项：
-        - 数据库中只有 `datas` 和 `texts` 两个表，**没有 `cards` 表**
-        - 必须使用 JOIN 语句连接 `datas` 和 `texts` 表
-        - 所有查询都必须包含 id, name, type, attribute, level, race, atk, def, desc 字段
+        使用示例：
+        - 按名称查询：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
+        - 按条件查询：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
 
-        Args:
-            sql(string): SQL查询语句，必须包含 id, name, type, attribute, level, race, atk, def, desc 字段，必须使用 JOIN 语句连接 datas 和 texts 表
-        
-        数据库结构描述：
-        - datas表：存储卡片基本信息
-          id: 卡片ID（整数，如 89631139 代表青眼白龙）
-          type: 卡片类型（1=怪兽, 2=魔法, 4=陷阱，使用位运算 & 判断）
-          attribute: 属性（0=无, 1=地, 2=水, 4=炎, 8=风, 16=光, 32=暗）
-          level: 等级（整数，如 8 代表8星）
-          race: 种族（整数编码，如 1=战士族, 2=魔法师族, 4=天使族, 8=恶魔族, 16=不死族, 32=机械族, 64=水族, 128=炎族, 256=岩石族, 512=鸟兽族, 1024=植物族, 2048=昆虫族, 4096=雷族, 8192=龙族, 16384=兽族, 32768=兽战士族, 65536=恐龙族, 131072=鱼族, 262144=海龙族, 524288=爬虫族, 1048576=念动力族, 2097152=幻神兽族, 4194304=创造神族, 8388608=幻龙族, 16777216=电子界族）
-          atk: 攻击力（整数，-1 代表 ?）
-          def: 防御力（整数，-1 代表 ?）
-        
-        - texts表：存储卡片文本信息
-          id: 卡片ID
-          name: 卡片名称（中文）
-          desc: 卡片描述（效果文本）
-        
-        表关系：datas.id = texts.id
-        
-        常用查询示例：
-        1. 按名称查询卡片：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE t.name LIKE '%青眼白龙%'
-        
-        错误示例（不要这样写）：
-        - SELECT * FROM cards WHERE name LIKE '%青眼白龙%' （错误：没有 cards 表）
-        - SELECT name FROM texts （错误：缺少必要字段）
-        - SELECT d.id, t.name FROM datas d （错误：没有 JOIN texts 表）
-        - SELECT id, name, type, attribute, level, race, atk, def, desc FROM datas JOIN texts ON datas.id = texts.id （错误：id 列名冲突）
-        
-        2. 查询攻击力大于3000的怪兽：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 1 AND d.atk > 3000
-        
-        3. 查询龙族怪兽：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 1 AND d.race = 8192
-        
-        4. 查询8星怪兽：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 1 AND d.level = 8
-        
-        5. 查询光属性怪兽：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 1 AND d.attribute = 16
-        
-        6. 查询效果包含"破坏"的卡片：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE t.desc LIKE '%破坏%'
-        
-        7. 查询魔法卡：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 2
-        
-        8. 查询陷阱卡：
-           SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc 
-           FROM datas d JOIN texts t ON d.id = t.id
-           WHERE d.type & 4
+        错误示例：
+        - SELECT * FROM cards WHERE name LIKE '%青眼白龙%' （无 cards 表）
+        - SELECT id, name FROM datas （缺少字段，无 JOIN）
         """
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
         
