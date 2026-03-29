@@ -29,6 +29,7 @@ dist/
 
 # Database
 *.sqlite3
+ygopro-database/
 
 # Logs
 logs/
