@@ -146,8 +146,10 @@ class CardQueryPlugin(Star):
             # 构建回复消息
             response = f"🔍 查询结果: {first_card['name']}\n"
             response += f"类型: {first_card['type']}\n"
-            if "ot" in first_card:
-                response += f"调整: {first_card['ot']}\n"
+            if "ocg_tcg" in first_card:
+                response += f"OCG/TCG: {first_card['ocg_tcg']}\n"
+            if "tuner" in first_card:
+                response += f"调整: 是\n"
             
             # 只有怪兽卡才显示属性、攻击、防御、等级等信息
             is_monster = "怪兽" in first_card.get('type', '')
@@ -209,8 +211,10 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 card_info = f"找到卡片：{card['name']}\n"
                 card_info += f"类型：{card['type']}\n"
-                if "ot" in card:
-                    card_info += f"调整：{card['ot']}\n"
+                if "ocg_tcg" in card:
+                    card_info += f"OCG/TCG：{card['ocg_tcg']}\n"
+                if "tuner" in card:
+                    card_info += f"调整：是\n"
                 
                 # 只有怪兽卡才显示属性、攻击、防御、等级等信息
                 is_monster = "怪兽" in card.get('type', '')

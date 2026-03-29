@@ -248,7 +248,7 @@ class CardQueryCore:
                 8388608: "幻龙"
             }
             
-            ot_map = {
+            ocg_tcg_map = {
                 1: "OCG",
                 2: "TCG",
                 3: "OCG|TCG",
@@ -263,8 +263,11 @@ class CardQueryCore:
                 # 解析卡片类型
                 card_type_str = "怪兽"
                 
-                # 解析调整信息
-                ot_str = ot_map.get(ot, "未知")
+                # 解析OCG/TCG信息
+                ocg_tcg_str = ocg_tcg_map.get(ot, "未知")
+                
+                # 检查是否是调整怪兽
+                is_tuner = (card_type & 16384) != 0
                 
                 # 构建详细的子类型
                 subtypes = []
@@ -322,12 +325,16 @@ class CardQueryCore:
                     "id": card_id,
                     "name": name,
                     "type": card_type_str,
-                    "ot": ot_str,
+                    "ocg_tcg": ocg_tcg_str,
                     "attribute": attribute_str,
                     "race": race_str,
                     "attack": atk,
                     "description": desc,
                 }
+                
+                # 添加调整怪兽标记
+                if is_tuner:
+                    card_info_base["tuner"] = True
                 
                 # 连接怪兽的类型标识是第26位 (0x4000000)
                 is_link_monster = (card_type & 0x4000000) != 0
