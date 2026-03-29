@@ -262,24 +262,30 @@ class CardQueryCore:
                 if len(row) >= 10:
                     # 完整的查询结果
                     card_id, name, card_type, attribute, level, race, atk, defense, desc, ot = row
-                else:
+                elif len(row) >= 13:
                     # 处理 d.*, t.name, t.desc 格式的查询
                     # 假设 datas 表的列顺序是: id, ot, alias, setcode, type, atk, def, level, race, attribute, category
                     # 然后是 t.name, t.desc
-                    if len(row) >= 13:
-                        card_id = row[0]
-                        ot = row[1]
-                        card_type = row[4]
-                        atk = row[5]
-                        defense = row[6]
-                        level = row[7]
-                        race = row[8]
-                        attribute = row[9]
-                        name = row[11]
-                        desc = row[12]
-                    else:
-                        # 无法处理的格式
-                        continue
+                    card_id = row[0]
+                    ot = row[1]
+                    card_type = row[4]
+                    atk = row[5]
+                    defense = row[6]
+                    level = row[7]
+                    race = row[8]
+                    attribute = row[9]
+                    name = row[11]
+                    desc = row[12]
+                elif len(row) == 7:
+                    # 处理 AI 常用的格式: SELECT d.id, t.name, d.atk, d.def, d.level, d.race, d.attribute
+                    card_id, name, atk, defense, level, race, attribute = row
+                    # 这些字段需要默认值
+                    ot = 3  # 默认 OCG|TCG
+                    card_type = 1  # 默认怪兽卡
+                    desc = ""
+                else:
+                    # 无法处理的格式
+                    continue
                 
                 # 解析卡片类型
                 card_type_str = "怪兽"
