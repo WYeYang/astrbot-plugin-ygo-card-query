@@ -220,6 +220,34 @@ class CardQueryCore:
                 32: "暗"
             }
             
+            race_map = {
+                0: "无",
+                1: "战士",
+                2: "魔法师",
+                4: "天使",
+                8: "恶魔",
+                16: "不死",
+                32: "机械",
+                64: "水",
+                128: "炎",
+                256: "岩石",
+                512: "鸟兽",
+                1024: "植物",
+                2048: "昆虫",
+                4096: "雷",
+                8192: "龙",
+                16384: "兽",
+                32768: "兽战士",
+                65536: "恐龙",
+                131072: "鱼",
+                262144: "海龙",
+                524288: "爬虫",
+                1048576: "念动力",
+                2097152: "幻神兽",
+                4194304: "创造神",
+                8388608: "幻龙"
+            }
+            
             for row in query_results:
                 card_id, name, card_type, attribute, level, race, atk, defense, desc = row
                 
@@ -275,14 +303,15 @@ class CardQueryCore:
                 
                 # 解析属性
                 attribute_str = attribute_map.get(attribute, "无")
-                
+                race_str = race_map.get(race, "未知")
+
                 # 构建卡片信息，根据卡片类型设置不同字段
                 card_info_base = {
                     "id": card_id,
                     "name": name,
                     "type": card_type_str,
                     "attribute": attribute_str,
-                    "race": race,
+                    "race": race_str,
                     "attack": atk,
                     "description": desc,
                 }
