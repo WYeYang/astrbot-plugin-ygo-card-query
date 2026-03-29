@@ -125,9 +125,9 @@ class CardQueryCore:
                 logger.info("正在执行 git clone，这可能需要一些时间...")
                 
                 # 首次克隆数据库
-                # 使用加速镜像
+                # 直接使用 GitHub 原始地址
                 result = await self._execute_git_command(
-                    ["git", "clone", "--progress", "https://gitee.com/moecube/ygopro-database.git", "ygopro-database"],
+                    ["git", "clone", "--progress", "https://github.com/moecube/ygopro-database.git", "ygopro-database"],
                     cwd=self.data_dir,
                     description="git clone"
                 )
@@ -235,7 +235,7 @@ class CardQueryCore:
                 
                 # 根据卡片类型确定等级/阶级/链接数
                 level_info = {}
-                if card_type & 64:  # XYZ怪兽
+                if card_type & 64:  # XYZ怪兽（超量）
                     level_info["rank"] = level
                 elif card_type & 128:  # 连接怪兽
                     level_info["link"] = level
