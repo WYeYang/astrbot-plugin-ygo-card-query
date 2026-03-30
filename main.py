@@ -240,7 +240,7 @@ class CardQueryPlugin(Star):
             sql(string): SQL查询语句。必须使用SELECT *查询所有字段，使用JOIN连接datas和texts表。
 
         数据库结构：
-        - datas表字段: id(卡片ID), ot(环境), setcode(系列码), type(类型), atk(攻击力), def(防御力), level(等级/阶级/链接), race(种族), attribute(属性), category(分类)
+        - datas表字段: id(卡片ID), type(类型), atk(攻击力), def(防御力), level(等级/阶级/链接), race(种族), attribute(属性)
         - texts表字段: id(卡片ID), name(名称), desc(效果描述)
         - 关联方式: datas.id = texts.id
 
