@@ -277,26 +277,34 @@ class CardQueryCore:
                 # 获取卡片ID
                 card_id = row_dict.get('id')
                 
-                # 重新查询完整的卡片信息，确保所有字段都存在
-                try:
-                    full_query = f"""
-                        SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
-                        FROM datas d 
-                        JOIN texts t ON d.id = t.id
-                        WHERE d.id = ?
-                    """
-                    cursor.execute(full_query, (card_id,))
-                    full_row = cursor.fetchone()
-                    if full_row:
-                        # 使用完整查询的结果
-                        row_dict = dict(full_row)
-                    else:
-                        # 如果查询失败，跳过此卡片
-                        continue
-                except Exception as e:
-                    logger.error(f"查询完整卡片信息失败: {e}")
-                    # 如果查询失败，跳过此卡片
-                    continue
+                # 检查是否已经有完整的字段
+                has_full_fields = all(key in row_dict for key in ['name', 'type', 'attribute', 'level', 'race', 'atk', 'def', 'desc', 'ot'])
+                
+                if not has_full_fields:
+                    # 重新查询完整的卡片信息，确保所有字段都存在
+                    try:
+                        full_query = f"""
+                            SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
+                            FROM datas d 
+                            JOIN texts t ON d.id = t.id
+                            WHERE d.id = ?
+                        """
+                        cursor.execute(full_query, (card_id,))
+                        full_row = cursor.fetchone()
+                        if full_row:
+                            # 使用完整查询的结果
+                            row_dict = dict(full_row)
+                        else:
+                            # 如果完整查询失败，但原始查询有基本字段，则使用原始查询
+                            if 'name' not in row_dict or row_dict.get('name') is None:
+                                # 跳过缺少name字段的记录
+                                continue
+                    except Exception as e:
+                        logger.error(f"查询完整卡片信息失败: {e}")
+                        # 如果完整查询失败，但原始查询有基本字段，则使用原始查询
+                        if 'name' not in row_dict or row_dict.get('name') is None:
+                            # 跳过缺少name字段的记录
+                            continue
                 
                 # 从字典中获取字段
                 card_id = row_dict.get('id')

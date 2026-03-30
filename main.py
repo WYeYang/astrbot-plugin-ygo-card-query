@@ -240,7 +240,7 @@ class CardQueryPlugin(Star):
         Args:
             sql(string): SQL查询语句。数据库结构：datas表(id,ot,alias,setcode,type,atk,def,level,race,attribute,category)和texts表(id,name,desc)通过id关联。使用JOIN连接两表，用表别名(d.id,t.name)避免冲突。
 
-        卡片类型标识：
+        卡片类型标识(d.type)：
         - 怪兽卡: d.type & 1
         - 魔法卡: d.type & 2
         - 陷阱卡: d.type & 4
@@ -258,10 +258,19 @@ class CardQueryPlugin(Star):
         - 场地魔法: d.type & 0x80000
         - 反击陷阱: d.type & 0x100000
 
+        属性值(d.attribute)：
+        - 地: 1, 水: 2, 炎: 4, 风: 8, 光: 16, 暗: 32, 神: 64
+
+        种族值(d.race)：
+        - 战士: 1, 魔法师: 2, 天使: 4, 恶魔: 8, 不死: 16, 机械: 32, 水: 64, 炎: 128
+        - 岩石: 256, 鸟兽: 512, 植物: 1024, 昆虫: 2048, 雷: 4096, 龙: 8192, 兽: 16384
+        - 兽战士: 32768, 恐龙: 65536, 鱼: 131072, 海龙: 262144, 爬虫: 524288
+        - 念动力: 1048576, 幻神兽: 2097152, 创造神: 4194304, 幻龙: 8388608
+
         示例：
         - 按名称：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
-        - 按属性：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 16
-        - 按种族：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192
+        - 按属性(暗属性=32)：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 32
+        - 按种族(龙族=8192)：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192
         - 按等级/阶级/链接：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8
         - 按攻击力：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
         - 按效果：SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
