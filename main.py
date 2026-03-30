@@ -206,7 +206,7 @@ class CardQueryPlugin(Star):
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
-        """查询游戏王卡片信息。
+        """查询游戏王卡片信息。此工具只需调用一次，会返回完整的卡片信息，不需要重复调用。
 
         Args:
             sql(string): SQL查询语句。格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
@@ -218,7 +218,7 @@ class CardQueryPlugin(Star):
                 - d.type: 类型(在datas表)，怪兽=1,通常=1,效果=33,融合=65,仪式=129,仪式效果=161,同调=8193,同调效果=8225,XYZ=8388609,XYZ效果=8388641,连接=67108865,连接效果=67108897,灵摆=16777233,灵摆效果=16777265,调整=16385,调整效果=16417,魔法=2,通常魔法=2,永续魔法=131074,装备魔法=262146,速攻魔法=65538,场地魔法=524290,仪式魔法=130,陷阱=4,通常陷阱=4,永续陷阱=131076,反击陷阱=1048580
                 - d.level: 等级/阶级/链接数
                 - d.atk/d.def: 攻击力/防御力
-                提示：查单张卡用 ORDER BY RANDOM() LIMIT 1；查多张用 ORDER BY RANDOM() LIMIT 3；搜效果用 t.desc LIKE '%关键词%'；查询时请使用简体中文关键词
+                提示：查单张卡用 ORDER BY RANDOM() LIMIT 1；查多张用 ORDER BY RANDOM() LIMIT 3；搜效果用 t.desc LIKE '%关键词%'；查询时请使用简体中文关键词；此工具只需调用一次即可获取完整信息
                 示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' ORDER BY RANDOM() LIMIT 3
         """
 
