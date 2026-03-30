@@ -178,7 +178,7 @@ class CardQueryPlugin(Star):
             logger.info("未找到与查询条件相关的卡片")
             if not is_tool_call:
                 await self._send_text_message(event, "⚠️ 未找到与查询条件相关的卡片")
-            return "查询已完成，未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片。不要再次调用查询工具。"
+            return "✅ 查询已成功完成，但未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片，并建议检查卡片名称或尝试其他关键词。绝对不要再次调用查询工具。"
         
         # 获取查询字符串（如果不是工具调用）
         if not is_tool_call and not query:
@@ -200,9 +200,9 @@ class CardQueryPlugin(Star):
         
         # AI查询返回最多3张详细信息
         cards_info = [self._build_card_info(c, is_ai=True) for c in cards[:3]]
-        prefix = f"✅ 查询成功！找到 {count} 张卡片"
-        suffix = "，显示前3张详细信息：" if count > 3 else "，详细信息如下："
-        return prefix + suffix + "\n\n" + "\n---\n".join(cards_info) + "\n\n✅ 查询已成功完成，请直接根据以上信息回复用户，绝对不要再次调用查询工具。"
+        prefix = f"查询成功，找到 {count} 张卡片"
+        suffix = "，显示前3张详细信息：" if count > 3 else "详细信息："
+        return prefix + suffix + "\n\n" + "\n---\n".join(cards_info) + "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
