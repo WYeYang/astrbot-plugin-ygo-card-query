@@ -234,42 +234,26 @@ class CardQueryPlugin(Star):
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
-        """查询游戏王卡片信息。当用户询问任何与游戏王卡片相关的问题时，使用此工具查询数据库获取准确的卡片信息。
+        """查询游戏王卡片信息。使用SELECT * FROM datas d JOIN texts t ON d.id=t.id，配合WHERE子句查询。
 
         Args:
-            sql(string): SQL查询语句。必须使用SELECT *查询所有字段，使用JOIN连接datas和texts表。
+            sql(string): SQL查询语句。必须使用SELECT *，使用JOIN连接datas和texts表。
 
-        数据库结构：
-        - datas表字段: id(卡片ID), type(类型), atk(攻击力), def(防御力), level(等级/阶级/链接), race(种族), attribute(属性)
-        - texts表字段: id(卡片ID), name(名称), desc(效果描述)
-        - 关联方式: datas.id = texts.id
+        常用字段及值：
+        - t.name: 卡片名称，用LIKE模糊查询，如t.name LIKE '%青眼%'
+        - t.desc: 效果描述，用LIKE搜索效果，如t.desc LIKE '%破坏%'
+        - d.attribute: 属性，地=1,水=2,炎=4,风=8,光=16,暗=32
+        - d.race: 种族，战士=1,魔法师=2,龙=8192,恶魔=8等
+        - d.type: 类型，怪兽=1,通常=1,效果=33,融合=65,同调=8193,XYZ=8388609,连接=67108865,魔法=2,陷阱=4
+        - d.level: 等级/阶级/链接数
+        - d.atk/d.def: 攻击力/防御力
 
-        重要提示：
-        - 始终使用 SELECT * 查询所有字段，不要指定具体列
-        - 使用 JOIN 连接 datas 和 texts 表
-        - 使用 WHERE 子句添加查询条件
-        - 使用 LIMIT 限制返回数量
-        - 当用户请求"抽一张卡"或"查一张卡"时，使用 ORDER BY RANDOM() LIMIT 1 随机选择一张
-        - 当查询结果可能超过1张时，使用 ORDER BY RANDOM() LIMIT 3 随机取出3张
-        - 当用户想要搜索特定效果时，使用 t.desc LIKE '%关键词%' 搜索效果描述字段
+        提示：
+        - 查单张卡：ORDER BY RANDOM() LIMIT 1
+        - 查多张卡：ORDER BY RANDOM() LIMIT 3
+        - 搜效果：t.desc LIKE '%关键词%'
 
-        字段映射：
-        - 属性(d.attribute): 地=1, 水=2, 炎=4, 风=8, 光=16, 暗=32, 神=64
-        - 种族(d.race): 战士=1, 魔法师=2, 天使=4, 恶魔=8, 不死=16, 机械=32, 水=64, 炎=128, 岩石=256, 鸟兽=512, 植物=1024, 昆虫=2048, 雷=4096, 龙=8192, 兽=16384, 兽战士=32768, 恐龙=65536, 鱼=131072, 海龙=262144, 爬虫=524288, 念动力=1048576, 幻神兽=2097152, 创造神=4194304, 幻龙=8388608
-        - 怪兽类型(d.type): 通常=1, 效果=33, 融合=65, 仪式=129, 仪式效果=161, 同调=8193, 同调效果=8225, XYZ=8388609, XYZ效果=8388641, 连接=67108865, 连接效果=67108897, 灵摆=16777233, 灵摆效果=16777265, 调整=16385, 调整效果=16417
-        - 魔法类型(d.type): 通常=2, 永续=131074, 装备=262146, 速攻=65538, 场地=524290, 仪式=130
-        - 陷阱类型(d.type): 通常=4, 永续=131076, 反击=1048580
-        - 环境(d.ot): OCG=1, TCG=2, OCG/TCG=3
-
-        示例：
-        - 按名称：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE t.name LIKE '%青眼白龙%'
-        - 按属性(暗属性=32)：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.attribute = 32
-        - 按种族(龙族=8192)：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.race = 8192
-        - 按等级：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.level = 8
-        - 按攻击力：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.atk > 3000
-        - 按效果：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE t.desc LIKE '%破坏%'
-        - 按卡片类型：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 2
-        - 按调整怪兽：SELECT * FROM datas d JOIN texts t ON d.id = t.id WHERE d.type & 1 AND d.type & 16384
+        示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' LIMIT 5
         """
 
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
