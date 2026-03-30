@@ -219,6 +219,7 @@ class CardQueryPlugin(Star):
                 - d.level: 等级/阶级/链接数
                 - d.atk/d.def: 攻击力/防御力
                 提示：查单张卡用 ORDER BY RANDOM() LIMIT 1；查多张用 ORDER BY RANDOM() LIMIT 3；搜效果用 t.desc LIKE '%关键词%'
+                返回格式：请使用简体中文返回卡片名称和效果描述
                 示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' ORDER BY RANDOM() LIMIT 3
         """
 
