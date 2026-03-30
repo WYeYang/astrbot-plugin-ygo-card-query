@@ -159,11 +159,12 @@ class CardQueryPlugin(Star):
         # 处理无结果的情况
         if result["count"] == 0:
             logger.info("未找到与查询条件相关的卡片")
-            no_result_message = "⚠️ 未找到与查询条件相关的卡片"
             # 如果不是AI查询，才向用户发送消息
             if not is_tool_call:
+                no_result_message = "⚠️ 未找到与查询条件相关的卡片"
                 await self._send_text_message(event, no_result_message)
-            return no_result_message
+            # 返回给AI的消息，让它认为查询成功但无结果，不再调用工具
+            return "查询完成，未找到符合条件的卡片。请尝试其他查询条件或确认卡片名称是否正确。"
         
         # 获取查询字符串（如果不是工具调用）
         if not is_tool_call and not query:
