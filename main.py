@@ -220,13 +220,14 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 return self._build_card_info(card, is_ai=True)
             elif result["count"] > 1:
-                # 超过1张时，返回所有卡片的详细信息，最多3张
-                cards_to_show = result["results"][:3]
+                # 超过1张时，随机选择最多3张卡片返回详细信息
+                import random
+                cards_to_show = random.sample(result["results"], min(3, len(result["results"])))
                 cards_info = []
                 for card in cards_to_show:
                     cards_info.append(self._build_card_info(card, is_ai=True))
                 if result["count"] > 3:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片，显示前3张详细信息：\n\n" + "\n---\n".join(cards_info)
+                    extra_info = f"查询成功，找到 {result['count']} 张卡片，随机显示3张详细信息：\n\n" + "\n---\n".join(cards_info)
                 else:
                     extra_info = f"查询成功，找到 {result['count']} 张卡片详细信息：\n\n" + "\n---\n".join(cards_info)
                 extra_info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
