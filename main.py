@@ -220,14 +220,13 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 return self._build_card_info(card, is_ai=True)
             elif result["count"] > 1:
-                # 超过1张时，返回卡片名字，最多3张
+                # 超过1张时，返回卡片名字，最多3张，并告知AI不要再查询
                 cards_to_show = result["results"][:3]
                 card_names = [card["name"] for card in cards_to_show]
                 if result["count"] > 3:
-                    extra_info = f"查询到 {result['count']} 张卡片，显示前3张：{', '.join(card_names)}"
+                    extra_info = f"查询成功，找到 {result['count']} 张卡片，显示前3张：{', '.join(card_names)}。请直接回复用户这些卡片名称，不要再次调用查询工具。"
                 else:
-                    extra_info = f"查询到 {result['count']} 张卡片：{', '.join(card_names)}"
-                extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级/阶级/链接数或攻击力范围。"
+                    extra_info = f"查询成功，找到 {result['count']} 张卡片：{', '.join(card_names)}。请直接回复用户这些卡片名称，不要再次调用查询工具。"
                 return extra_info
         else:
             return "查询完成"
