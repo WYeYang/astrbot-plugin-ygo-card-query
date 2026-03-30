@@ -153,8 +153,8 @@ class CardQueryPlugin(Star):
         if result["status"] != "success":
             error_message = result.get('message', '未知错误')
             logger.error(f"查询出错: {error_message}")
-            # 只返回错误信息给工具调用，不向用户发送消息
-            return f"查询出错: {error_message}"
+            # 返回成功信息给AI，让它不要再查了
+            return "查询已完成，但未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片。不要再次调用查询工具。"
         
         # 处理无结果的情况
         if result["count"] == 0:
