@@ -250,6 +250,7 @@ class CardQueryPlugin(Star):
         - 使用 JOIN 连接 datas 和 texts 表
         - 使用 WHERE 子句添加查询条件
         - 使用 LIMIT 限制返回数量
+        - 当用户请求"抽一张卡"或"查一张卡"时，使用 ORDER BY RANDOM() LIMIT 1 随机选择一张
 
         字段映射：
         - 属性(d.attribute): 地=1, 水=2, 炎=4, 风=8, 光=16, 暗=32, 神=64
