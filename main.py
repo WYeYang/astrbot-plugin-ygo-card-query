@@ -233,30 +233,23 @@ class CardQueryPlugin(Star):
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
-        """查询游戏王卡片信息。使用SELECT * FROM datas d JOIN texts t ON d.id=t.id，配合WHERE子句查询。
+        """查询游戏王卡片信息。
 
         Args:
-            sql(string): SQL查询语句。必须使用SELECT *，使用JOIN连接datas和texts表。
-
-        数据库结构(重要：严格使用以下字段名)：
-        - datas表(别名d)：id, type, atk, def, level, race, attribute
-        - texts表(别名t)：id, name(卡片名称), desc(效果描述，不是text)
-        
-        常用字段及值：
-        - t.name: 卡片名称，如t.name LIKE '%青眼%'
-        - t.desc: 效果描述，如t.desc LIKE '%破坏%'
-        - d.attribute: 属性，地=1,水=2,炎=4,风=8,光=16,暗=32,神=64
-        - d.race: 种族(在datas表)，战士=1,魔法师=2,天使=4,恶魔=8,不死=16,机械=32,水=64,炎=128,岩石=256,鸟兽=512,植物=1024,昆虫=2048,雷=4096,龙=8192,兽=16384,兽战士=32768,恐龙=65536,鱼=131072,海龙=262144,爬虫=524288,念动力=1048576,幻神兽=2097152,创造神=4194304,幻龙=8388608
-        - d.type: 类型(在datas表)，怪兽=1,通常=1,效果=33,融合=65,仪式=129,仪式效果=161,同调=8193,同调效果=8225,XYZ=8388609,XYZ效果=8388641,连接=67108865,连接效果=67108897,灵摆=16777233,灵摆效果=16777265,调整=16385,调整效果=16417,魔法=2,通常魔法=2,永续魔法=131074,装备魔法=262146,速攻魔法=65538,场地魔法=524290,仪式魔法=130,陷阱=4,通常陷阱=4,永续陷阱=131076,反击陷阱=1048580
-        - d.level: 等级/阶级/链接数(在datas表)
-        - d.atk/d.def: 攻击力/防御力(在datas表)
-
-        提示：
-        - 查单张卡：ORDER BY RANDOM() LIMIT 1
-        - 查多张卡：ORDER BY RANDOM() LIMIT 3
-        - 搜效果：t.desc LIKE '%关键词%'
-
-        示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' LIMIT 5
+            sql(string): SQL查询语句。格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
+            
+            重要字段说明：
+            - t.name: 卡片名称(在texts表)，如 t.name LIKE '%青眼%'
+            - t.desc: 效果描述(在texts表)，如 t.desc LIKE '%破坏%'
+            - d.attribute: 属性(在datas表)，地=1,水=2,炎=4,风=8,光=16,暗=32,神=64
+            - d.race: 种族(在datas表)，战士=1,魔法师=2,龙=8192,恶魔=8等
+            - d.type: 类型(在datas表)，怪兽=1,效果=33,融合=65,同调=8193,XYZ=8388609,连接=67108865,魔法=2,陷阱=4
+            - d.level: 等级/阶级/链接数
+            - d.atk/d.def: 攻击力/防御力
+            
+            提示：查单张卡用 ORDER BY RANDOM() LIMIT 1，查多张用 LIMIT 3，搜效果用 t.desc LIKE '%关键词%'
+            
+            示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' LIMIT 5
         """
 
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
