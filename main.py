@@ -170,8 +170,8 @@ class CardQueryPlugin(Star):
             if len(parts) > 1:
                 query = " ".join(parts[1:])
         
-        # 如果有多张卡片，选择匹配度最高的
-        if result["count"] > 1:
+        # 如果有多张卡片且不是AI查询，选择匹配度最高的
+        if result["count"] > 1 and not is_tool_call:
             logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
             best_card = self._get_best_match_card(result["results"], query)
             # 替换结果列表为最佳匹配
