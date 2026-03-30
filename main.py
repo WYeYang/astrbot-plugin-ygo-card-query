@@ -216,17 +216,13 @@ class CardQueryPlugin(Star):
                 # 返回完整的卡片信息给 AI
                 card = result["results"][0]
                 return self._build_card_info(card, is_ai=True)
-            else:
-                # 大于三张取三张，大于一张有几张取几张
+            elif result["count"] > 1:
+                # 超过1张时，返回卡片名字，最多3张
+                cards_to_show = result["results"][:3]
+                card_names = [card["name"] for card in cards_to_show]
                 if result["count"] > 3:
-                    # 大于三张，取前三张
-                    top_cards = result["results"][:3]
-                    card_names = [card["name"] for card in top_cards]
                     extra_info = f"查询到 {result['count']} 张卡片，显示前3张：{', '.join(card_names)}"
                 else:
-                    # 大于一张但不超过三张，显示所有卡片
-                    all_cards = result["results"]
-                    card_names = [card["name"] for card in all_cards]
                     extra_info = f"查询到 {result['count']} 张卡片：{', '.join(card_names)}"
                 extra_info += " 请提供更多条件以缩小查询范围，例如指定属性、种族、等级/阶级/链接数或攻击力范围。"
                 return extra_info
