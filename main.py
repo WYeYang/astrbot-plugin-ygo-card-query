@@ -147,6 +147,30 @@ class CardQueryPlugin(Star):
         logger.info(f"最佳匹配卡片: {best_card['name']} (匹配分数: {best_score:.2f})")
         return best_card
     
+    async def _send_card_info(self, event: AstrMessageEvent, card: Dict, is_random: bool = False):
+        """发送卡片信息和图片给用户"""
+        response = self._build_card_info(card, is_ai=False)
+        card_id = card.get("id")
+        
+        if card_id:
+            image_url = self.core.get_card_image_url(card_id)
+            if image_url:
+                try:
+                    chain = []
+                    chain.append(Comp.Image.fromURL(image_url))
+                    chain.append(Comp.Plain(response))
+                    if is_random:
+                        logger.info(f"随机发送卡片图片和文本: {card['name']}")
+                    else:
+                        logger.info(f"发送卡片图片和文本: {card['name']}")
+                    await event.send(event.chain_result(chain))
+                    return
+                except Exception as e:
+                    logger.error(f"发送图片失败: {e}")
+        
+        # 如果没有图片或发送失败，只发送文本
+        await self._send_text_message(event, response)
+    
     async def _handle_query_result(self, event: AstrMessageEvent, result: Dict[str, Any], is_tool_call: bool = False, query: str = ""):
         """处理查询结果并发送响应"""
         # 处理查询失败的情况
@@ -187,55 +211,14 @@ class CardQueryPlugin(Star):
             # 只有一张卡片，发送卡片信息和图片
             first_card = result["results"][0]
             logger.info(f"返回第一张卡片: {first_card['name']}")
-            
-            # 构建回复消息
-            response = self._build_card_info(first_card, is_ai=False)
-            
-            if result.get("note"):
-                response += f"\n💡 {result['note']}"
-            
-            # 尝试发送图片和文本
-            card_id = first_card.get("id")
-            if card_id:
-                image_url = self.core.get_card_image_url(card_id)
-                if image_url:
-                    try:
-                        chain = []
-                        chain.append(Comp.Image.fromURL(image_url))
-                        chain.append(Comp.Plain(response))
-                        logger.info(f"发送卡片图片和文本: {first_card['name']}")
-                        await event.send(event.chain_result(chain))
-                    except Exception as e:
-                        logger.error(f"发送图片失败: {e}")
-                        await self._send_text_message(event, response)
-                else:
-                    await self._send_text_message(event, response)
-            else:
-                await self._send_text_message(event, response)
+            await self._send_card_info(event, first_card, is_random=False)
         
         # 处理工具调用的返回信息
         if is_tool_call:
             if result["count"] == 1:
                 # 只有一张卡片，发送卡片信息和图片给用户
                 card = result["results"][0]
-                response = self._build_card_info(card, is_ai=False)
-                card_id = card.get("id")
-                if card_id:
-                    image_url = self.core.get_card_image_url(card_id)
-                    if image_url:
-                        try:
-                            chain = []
-                            chain.append(Comp.Image.fromURL(image_url))
-                            chain.append(Comp.Plain(response))
-                            logger.info(f"发送卡片图片和文本: {card['name']}")
-                            await event.send(event.chain_result(chain))
-                        except Exception as e:
-                            logger.error(f"发送图片失败: {e}")
-                            await self._send_text_message(event, response)
-                    else:
-                        await self._send_text_message(event, response)
-                else:
-                    await self._send_text_message(event, response)
+                await self._send_card_info(event, card, is_random=False)
                 # 返回给AI的信息
                 info = self._build_card_info(card, is_ai=True)
                 info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
@@ -244,24 +227,7 @@ class CardQueryPlugin(Star):
                 # 超过1张时，随机选择一张发送给用户
                 import random
                 random_card = random.choice(result["results"])
-                response = self._build_card_info(random_card, is_ai=False)
-                card_id = random_card.get("id")
-                if card_id:
-                    image_url = self.core.get_card_image_url(card_id)
-                    if image_url:
-                        try:
-                            chain = []
-                            chain.append(Comp.Image.fromURL(image_url))
-                            chain.append(Comp.Plain(response))
-                            logger.info(f"随机发送卡片图片和文本: {random_card['name']}")
-                            await event.send(event.chain_result(chain))
-                        except Exception as e:
-                            logger.error(f"发送图片失败: {e}")
-                            await self._send_text_message(event, response)
-                    else:
-                        await self._send_text_message(event, response)
-                else:
-                    await self._send_text_message(event, response)
+                await self._send_card_info(event, random_card, is_random=True)
                 # 返回给AI的信息
                 extra_info = f"查询成功，找到 {result['count']} 张卡片，随机选择一张详细信息：\n\n"
                 extra_info += self._build_card_info(random_card, is_ai=True)
