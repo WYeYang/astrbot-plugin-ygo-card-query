@@ -173,74 +173,35 @@ class CardQueryPlugin(Star):
     
     async def _handle_query_result(self, event: AstrMessageEvent, result: Dict[str, Any], is_tool_call: bool = False, query: str = ""):
         """处理查询结果并发送响应"""
-        # 处理查询失败的情况
-        if result["status"] != "success":
-            error_message = result.get('message', '未知错误')
-            logger.error(f"查询出错: {error_message}")
-            # 返回成功信息给AI，让它不要再查了
-            return "查询已完成，但未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片。不要再次调用查询工具。"
-        
-        # 处理无结果的情况
-        if result["count"] == 0:
+        # 处理查询失败或无结果的情况
+        if result["status"] != "success" or result["count"] == 0:
             logger.info("未找到与查询条件相关的卡片")
-            # 如果不是AI查询，才向用户发送消息
             if not is_tool_call:
-                no_result_message = "⚠️ 未找到与查询条件相关的卡片"
-                await self._send_text_message(event, no_result_message)
-            # 返回给AI的消息，明确告知不要再调用工具
-            return "查询已完成，未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片，并建议检查卡片名称或尝试其他关键词。不要再次调用查询工具。"
+                await self._send_text_message(event, "⚠️ 未找到与查询条件相关的卡片")
+            return "查询已完成，未找到符合条件的卡片。请直接回复用户，告知未找到相关卡片。不要再次调用查询工具。"
         
         # 获取查询字符串（如果不是工具调用）
         if not is_tool_call and not query:
-            message_text = event.get_message_str().strip()
-            parts = message_text.split() if message_text else []
-            if len(parts) > 1:
-                query = " ".join(parts[1:])
+            parts = event.get_message_str().strip().split()
+            query = " ".join(parts[1:]) if len(parts) > 1 else ""
         
-        # 如果有多张卡片且不是AI查询，选择匹配度最高的
-        if result["count"] > 1 and not is_tool_call:
-            logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
-            best_card = self._get_best_match_card(result["results"], query)
-            # 替换结果列表为最佳匹配
-            result["results"] = [best_card]
-            result["count"] = 1
-            logger.info(f"选择最佳匹配卡片: {best_card['name']}")
+        cards = result["results"]
+        count = result["count"]
         
-        # 处理用户查询的返回信息（无论是工具调用还是直接查询）
-        if result["count"] == 1:
-            # 只有一张卡片，发送卡片信息和图片
-            first_card = result["results"][0]
-            logger.info(f"返回第一张卡片: {first_card['name']}")
-            await self._send_card_info(event, first_card, is_random=False)
-        
-        # 处理工具调用的返回信息
-        if is_tool_call:
-            if result["count"] == 1:
-                # 只有一张卡片，发送卡片信息和图片给用户
-                card = result["results"][0]
-                await self._send_card_info(event, card, is_random=False)
-                # 返回给AI的信息
-                info = self._build_card_info(card, is_ai=True)
-                info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
-                return info
-            elif result["count"] > 1:
-                # 超过1张时，随机选择一张发送给用户
-                import random
-                random_card = random.choice(result["results"])
-                await self._send_card_info(event, random_card, is_random=True)
-                # 返回给AI的信息（最多3张详细信息）
-                cards_to_show = result["results"][:3]
-                cards_info = []
-                for card in cards_to_show:
-                    cards_info.append(self._build_card_info(card, is_ai=True))
-                if result["count"] > 3:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片，显示前3张详细信息：\n\n" + "\n---\n".join(cards_info)
-                else:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片详细信息：\n\n" + "\n---\n".join(cards_info)
-                extra_info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
-                return extra_info
-        else:
+        # 非AI查询：选择最佳匹配或随机选择
+        if not is_tool_call:
+            card = self._get_best_match_card(cards, query) if count > 1 else cards[0]
+            await self._send_card_info(event, card, is_random=False)
             return "查询完成"
+        
+        # AI查询：发送随机一张给用户，返回最多3张信息给AI
+        import random
+        await self._send_card_info(event, random.choice(cards), is_random=True)
+        
+        cards_info = [self._build_card_info(c, is_ai=True) for c in cards[:3]]
+        prefix = f"查询成功，找到 {count} 张卡片"
+        suffix = "，显示前3张详细信息：" if count > 3 else "详细信息："
+        return prefix + suffix + "\n\n" + "\n---\n".join(cards_info) + "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
