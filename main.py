@@ -220,14 +220,13 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 return self._build_card_info(card, is_ai=True)
             elif result["count"] > 1:
-                # 超过1张时，随机选择最多3张卡片返回详细信息
-                import random
-                cards_to_show = random.sample(result["results"], min(3, len(result["results"])))
+                # 超过1张时，返回所有卡片的详细信息，最多3张
+                cards_to_show = result["results"][:3]
                 cards_info = []
                 for card in cards_to_show:
                     cards_info.append(self._build_card_info(card, is_ai=True))
                 if result["count"] > 3:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片，随机显示3张详细信息：\n\n" + "\n---\n".join(cards_info)
+                    extra_info = f"查询成功，找到 {result['count']} 张卡片，显示前3张详细信息：\n\n" + "\n---\n".join(cards_info)
                 else:
                     extra_info = f"查询成功，找到 {result['count']} 张卡片详细信息：\n\n" + "\n---\n".join(cards_info)
                 extra_info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
@@ -249,8 +248,8 @@ class CardQueryPlugin(Star):
                 - d.type: 类型(在datas表)，怪兽=1,通常=1,效果=33,融合=65,仪式=129,仪式效果=161,同调=8193,同调效果=8225,XYZ=8388609,XYZ效果=8388641,连接=67108865,连接效果=67108897,灵摆=16777233,灵摆效果=16777265,调整=16385,调整效果=16417,魔法=2,通常魔法=2,永续魔法=131074,装备魔法=262146,速攻魔法=65538,场地魔法=524290,仪式魔法=130,陷阱=4,通常陷阱=4,永续陷阱=131076,反击陷阱=1048580
                 - d.level: 等级/阶级/链接数
                 - d.atk/d.def: 攻击力/防御力
-                提示：查单张卡用 ORDER BY RANDOM() LIMIT 1，查多张用 LIMIT 3，搜效果用 t.desc LIKE '%关键词%'
-                示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' LIMIT 5
+                提示：查单张卡用 ORDER BY RANDOM() LIMIT 1；查多张用 ORDER BY RANDOM() LIMIT 3；搜效果用 t.desc LIKE '%关键词%'
+                示例：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE t.name LIKE '%青眼%' ORDER BY RANDOM() LIMIT 3
         """
 
         logger.info(f"开始处理工具调用: query_card, 参数: sql={sql}")
