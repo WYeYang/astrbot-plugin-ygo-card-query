@@ -198,11 +198,11 @@ class CardQueryPlugin(Star):
         if not is_tool_call:
             return "查询完成"
         
-        # AI查询返回最多3张详细信息
-        cards_info = [self._build_card_info(c, is_ai=True) for c in cards[:3]]
+        # AI查询返回最多3张卡片名称
+        card_names = [c["name"] for c in cards[:3]]
         prefix = f"查询成功，找到 {count} 张卡片"
-        suffix = "，显示前3张详细信息：" if count > 3 else "详细信息："
-        return prefix + suffix + "\n\n" + "\n---\n".join(cards_info) + "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
+        suffix = "，显示前3张：" if count > 3 else "："
+        return prefix + suffix + "、".join(card_names) + "\n\n请根据以上卡片名称回复用户，不要再次调用查询工具。"
     
     @filter.llm_tool(name="query_card")
     async def query_card(self, event: AstrMessageEvent, sql: str = ""):
@@ -213,9 +213,9 @@ class CardQueryPlugin(Star):
                 重要字段说明：
                 - t.name: 卡片名称(在texts表)，如 t.name LIKE '%青眼%'
                 - t.desc: 效果描述(在texts表)，如 t.desc LIKE '%破坏%'
-                - d.attribute: 属性(在datas表)，地=1,水=2,炎=4,风=8,光=16,暗=32,神=64
-                - d.race: 种族(在datas表)，战士=1,魔法师=2,天使=4,恶魔=8,不死=16,机械=32,水=64,炎=128,岩石=256,鸟兽=512,植物=1024,昆虫=2048,雷=4096,龙=8192,兽=16384,兽战士=32768,恐龙=65536,鱼=131072,海龙=262144,爬虫=524288,念动力=1048576,幻神兽=2097152,创造神=4194304,幻龙=8388608
-                - d.type: 类型(在datas表)，怪兽=1,通常=1,效果=33,融合=65,仪式=129,仪式效果=161,同调=8193,同调效果=8225,XYZ=8388609,XYZ效果=8388641,连接=67108865,连接效果=67108897,灵摆=16777233,灵摆效果=16777265,调整=16385,调整效果=16417,魔法=2,通常魔法=2,永续魔法=131074,装备魔法=262146,速攻魔法=65538,场地魔法=524290,仪式魔法=130,陷阱=4,通常陷阱=4,永续陷阱=131076,反击陷阱=1048580
+                - d.attribute: 属性，地=1,水=2,炎=4,风=8,光=16,暗=32,神=64
+                - d.race: 种族，战士=1,魔法师=2,龙=8192,恶魔=8等
+                - d.type: 类型，怪兽=1,魔法=2,陷阱=4,效果=33,融合=65,仪式=129,同调=8193,XYZ=8388609,连接=67108865,灵摆=16777233,调整=16385
                 - d.level: 等级/阶级/链接数
                 - d.atk/d.def: 攻击力/防御力
                 提示：查单张卡用 ORDER BY RANDOM() LIMIT 1；查多张用 ORDER BY RANDOM() LIMIT 3；搜效果用 t.desc LIKE '%关键词%'；查询时请使用简体中文关键词；此工具只需调用一次即可获取完整信息；如果用户想找"老婆"或妹卡，请使用AI自行推理，搜索合适的怪兽卡
