@@ -173,15 +173,14 @@ class CardQueryPlugin(Star):
             if len(parts) > 1:
                 query = " ".join(parts[1:])
         
-        # 如果有多张卡片且不是AI查询，随机选择一张
+        # 如果有多张卡片且不是AI查询，选择匹配度最高的
         if result["count"] > 1 and not is_tool_call:
-            import random
-            logger.info(f"找到 {result['count']} 张卡片，随机选择一张")
-            random_card = random.choice(result["results"])
-            # 替换结果列表为随机选择
-            result["results"] = [random_card]
+            logger.info(f"找到 {result['count']} 张卡片，根据名称匹配度选择最佳匹配")
+            best_card = self._get_best_match_card(result["results"], query)
+            # 替换结果列表为最佳匹配
+            result["results"] = [best_card]
             result["count"] = 1
-            logger.info(f"随机选择卡片: {random_card['name']}")
+            logger.info(f"选择最佳匹配卡片: {best_card['name']}")
         
         # 处理用户查询的返回信息（无论是工具调用还是直接查询）
         if result["count"] == 1:
@@ -221,15 +220,11 @@ class CardQueryPlugin(Star):
                 card = result["results"][0]
                 return self._build_card_info(card, is_ai=True)
             elif result["count"] > 1:
-                # 超过1张时，返回所有卡片的详细信息，最多3张
-                cards_to_show = result["results"][:3]
-                cards_info = []
-                for card in cards_to_show:
-                    cards_info.append(self._build_card_info(card, is_ai=True))
-                if result["count"] > 3:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片，显示前3张详细信息：\n\n" + "\n---\n".join(cards_info)
-                else:
-                    extra_info = f"查询成功，找到 {result['count']} 张卡片详细信息：\n\n" + "\n---\n".join(cards_info)
+                # 超过1张时，随机选择一张返回详细信息
+                import random
+                random_card = random.choice(result["results"])
+                extra_info = f"查询成功，找到 {result['count']} 张卡片，随机选择一张详细信息：\n\n"
+                extra_info += self._build_card_info(random_card, is_ai=True)
                 extra_info += "\n\n请根据以上信息回复用户，不要再次调用查询工具。"
                 return extra_info
         else:
