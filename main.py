@@ -251,6 +251,7 @@ class CardQueryPlugin(Star):
         - 使用 LIMIT 限制返回数量
         - 当用户请求"抽一张卡"或"查一张卡"时，使用 ORDER BY RANDOM() LIMIT 1 随机选择一张
         - 当查询结果可能超过1张时，使用 ORDER BY RANDOM() LIMIT 3 随机取出3张
+        - 当用户想要搜索特定效果时，使用 t.desc LIKE '%关键词%' 搜索效果描述字段
 
         字段映射：
         - 属性(d.attribute): 地=1, 水=2, 炎=4, 风=8, 光=16, 暗=32, 神=64
