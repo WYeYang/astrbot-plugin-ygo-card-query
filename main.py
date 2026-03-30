@@ -188,16 +188,17 @@ class CardQueryPlugin(Star):
         cards = result["results"]
         count = result["count"]
         
-        # 非AI查询：选择最佳匹配或随机选择
+        # 选择最佳匹配卡片（多张时）
+        card = self._get_best_match_card(cards, query) if count > 1 else cards[0]
+        
+        # 发送卡片信息给用户
+        await self._send_card_info(event, card, is_random=False)
+        
+        # 非AI查询直接返回
         if not is_tool_call:
-            card = self._get_best_match_card(cards, query) if count > 1 else cards[0]
-            await self._send_card_info(event, card, is_random=False)
             return "查询完成"
         
-        # AI查询：发送随机一张给用户，返回最多3张信息给AI
-        import random
-        await self._send_card_info(event, random.choice(cards), is_random=True)
-        
+        # AI查询返回最多3张详细信息
         cards_info = [self._build_card_info(c, is_ai=True) for c in cards[:3]]
         prefix = f"查询成功，找到 {count} 张卡片"
         suffix = "，显示前3张详细信息：" if count > 3 else "详细信息："
