@@ -62,11 +62,17 @@ class CardQueryCore:
         
         # 实时读取输出 - 逐字符读取以处理 \r 进度更新
         while True:
+            # 非阻塞读取，避免卡住
             char = await process.stdout.read(1)
             if not char:
-                if process.returncode is not None:
+                # 检查进程是否已结束
+                try:
+                    # 尝试等待进程结束，最多等待1秒
+                    returncode = await asyncio.wait_for(process.wait(), timeout=1)
                     break
-                continue
+                except asyncio.TimeoutError:
+                    # 进程仍在运行，继续读取
+                    continue
             
             try:
                 decoded_char = char.decode('utf-8', errors='replace')
@@ -89,7 +95,6 @@ class CardQueryCore:
             logger.info(f"[{description}] {line}")
             stdout_lines.append(line + '\n')
         
-        await process.wait()
         logger.info(f"{description} 返回码: {process.returncode}")
         
         if process.returncode != 0:
