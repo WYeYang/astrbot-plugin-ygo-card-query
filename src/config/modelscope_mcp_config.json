@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ygo-card-query-http": {
+      "type": "streamableHttp",
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
