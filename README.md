@@ -155,7 +155,7 @@ Streamable HTTP 配置文件位于 `src/config/streamable_http_config.json`，�
 {
   "mcpServers": {
     "ygo-card-query-http": {
-      "type": "http",
+      "type": "streamableHttp",
       "url": "http://localhost:8000/mcp"
     }
   }
