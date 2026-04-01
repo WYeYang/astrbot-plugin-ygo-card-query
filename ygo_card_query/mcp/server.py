@@ -14,10 +14,10 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
-from ..core import CardQueryCore, config_manager
+from ..core import CardQueryCore, mcp_config_manager
 
-# 从配置文件读取MCP服务器配置
-mcp_config = config_manager.get_mcp_config()
+# 从MCP配置文件读取配置
+mcp_config = mcp_config_manager.get_mcp_config()
 server_name = mcp_config.get('server_name', 'ygo-card-query-mcp')
 
 app = Server(server_name)
@@ -27,8 +27,8 @@ core = CardQueryCore(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".
 
 @app.list_tools()
 async def list_tools() -> list[Tool]:
-    # 从配置文件读取工具列表
-    mcp_config = config_manager.get_mcp_config()
+    # 从MCP配置文件读取工具列表
+    mcp_config = mcp_config_manager.get_mcp_config()
     tools_config = mcp_config.get('tools', [])
     
     # 构建工具列表
@@ -120,8 +120,8 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             cards = result["results"]
             count = result["count"]
             
-            # 从配置文件读取最大返回结果数
-            card_query_config = config_manager.get_card_query_config()
+            # 从MCP配置文件读取最大返回结果数
+            card_query_config = mcp_config_manager.get_card_query_config()
             max_results = card_query_config.get('max_results', 10)
             
             output_lines = [f"查询成功，找到 {count} 张卡片：\n"]

@@ -5,7 +5,6 @@
 """
 
 import os
-import platform
 import yaml
 from typing import Dict, Any
 
@@ -13,28 +12,28 @@ from typing import Dict, Any
 class ConfigManager:
     """配置管理类"""
     
-    def __init__(self, config_path: str = None):
+    def __init__(self, config_path: str = None, config_type: str = None):
         """
         初始化配置管理器
         
         Args:
             config_path: 配置文件路径，如果为None则使用默认路径
+            config_type: 配置类型，可选值: 'plugin' (插件配置), 'mcp' (MCP服务器配置)
         """
         if config_path is None:
-            # 获取平台信息
-            current_platform = platform.system().lower()
-            
-            # 构建平台特定的配置文件路径
+            # 构建配置文件路径
             config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config")
-            platform_config_path = os.path.join(config_dir, f"config_{current_platform}.yaml")
-            default_config_path = os.path.join(config_dir, "config.yaml")
             
-            # 优先使用平台特定的配置文件，如果不存在则使用默认配置文件
-            if os.path.exists(platform_config_path):
-                config_path = platform_config_path
-                print(f"使用平台特定配置文件: {config_path}")
+            # 根据配置类型选择不同的配置文件
+            if config_type == 'plugin':
+                config_path = os.path.join(config_dir, "plugin_config.yaml")
+                print(f"使用插件配置文件: {config_path}")
+            elif config_type == 'mcp':
+                config_path = os.path.join(config_dir, "mcp_config.yaml")
+                print(f"使用MCP配置文件: {config_path}")
             else:
-                config_path = default_config_path
+                # 默认配置文件
+                config_path = os.path.join(config_dir, "config.yaml")
                 print(f"使用默认配置文件: {config_path}")
         
         self.config_path = config_path
@@ -116,3 +115,9 @@ class ConfigManager:
 
 # 创建全局配置实例
 config_manager = ConfigManager()
+
+# 创建插件配置实例
+plugin_config_manager = ConfigManager(config_type='plugin')
+
+# 创建MCP配置实例
+mcp_config_manager = ConfigManager(config_type='mcp')
