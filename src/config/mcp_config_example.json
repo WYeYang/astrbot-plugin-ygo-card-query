@@ -9,24 +9,7 @@
         "-m",
         "ygo_mcp.server"
       ],
-      "cwd": "/tmp",
-      "url": "http://localhost:8000/mcp",
-      "tools": [
-        {
-          "name": "query_card",
-          "description": "查询游戏王卡片信息",
-          "inputSchema": {
-            "type": "object",
-            "properties": {
-              "sql": {
-                "type": "string",
-                "description": "SQL查询语句"
-              }
-            },
-            "required": ["sql"]
-          }
-        }
-      ]
+      "cwd": "/tmp"
     }
   }
 }

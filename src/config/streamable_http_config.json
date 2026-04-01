@@ -1,39 +1,8 @@
 {
   "mcpServers": {
     "ygo-card-query-http": {
-      "command": "uvx",
-      "args": [
-        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
-        "--",
-        "python",
-        "-m",
-        "ygo_mcp.server",
-        "--transport",
-        "streamable-http"
-      ],
-      "cwd": "/tmp",
-      "url": "http://localhost:8000/mcp",
-      "tools": [
-        {
-          "name": "query_card",
-          "description": "查询游戏王卡片信息",
-          "inputSchema": {
-            "type": "object",
-            "properties": {
-              "sql": {
-                "type": "string",
-                "description": "SQL查询语句"
-              }
-            },
-            "required": ["sql"]
-          }
-        }
-      ],
-      "env": {
-        "MCP_SERVER_NAME": "ygo-card-query-mcp",
-        "MCP_HOST": "127.0.0.1",
-        "MCP_PORT": "8000"
-      }
+      "type": "sse",
+      "url": "http://localhost:8000/mcp"
     }
   }
 }
