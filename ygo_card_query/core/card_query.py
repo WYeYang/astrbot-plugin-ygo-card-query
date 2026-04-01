@@ -20,6 +20,8 @@ import threading
 import asyncio
 from typing import Dict, Any, List
 
+from .config import config_manager
+
 
 class Logger:
     def info(self, msg):
@@ -39,7 +41,11 @@ class CardQueryCore:
     def __init__(self, data_dir=None):
         """初始化核心功能"""
         self.data_dir = data_dir if data_dir else os.getcwd()
-        self.db_dir = os.path.join(self.data_dir, "ygopro-database")
+        
+        # 从配置文件读取数据库目录配置
+        database_config = config_manager.get_database_config()
+        db_dir_from_config = database_config.get('db_dir', 'ygopro_database')
+        self.db_dir = os.path.join(self.data_dir, db_dir_from_config)
         
         logger.info(f"CardQuery 数据目录: {self.data_dir}")
         logger.info(f"数据库目录: {self.db_dir}")
@@ -124,8 +130,13 @@ class CardQueryCore:
                 logger.info(f"克隆目标目录: {self.data_dir}")
                 logger.info("正在执行 git clone，这可能需要一些时间...")
                 
+                # 从配置文件读取git仓库URL
+                database_config = config_manager.get_database_config()
+                git_repo = database_config.get('git_repo', 'https://github.com/moecube/ygopro-database.git')
+                db_dir_from_config = database_config.get('db_dir', 'ygopro_database')
+                
                 result = await self._execute_git_command(
-                    ["git", "clone", "--progress", "https://github.com/moecube/ygopro-database.git", "ygopro-database"],
+                    ["git", "clone", "--progress", git_repo, db_dir_from_config],
                     cwd=self.data_dir,
                     description="git clone"
                 )
@@ -154,10 +165,15 @@ class CardQueryCore:
         """处理卡片查询"""
         logger.info("开始查询，执行SQL查询...")
         
-        cdb_path = os.path.join(self.db_dir, "locales", "zh-CN", "cards.cdb")
+        # 从配置文件读取数据库文件路径
+        database_config = config_manager.get_database_config()
+        cdb_path_from_config = database_config.get('cdb_path', 'locales/zh-CN/cards.cdb')
+        fallback_cdb_path_from_config = database_config.get('fallback_cdb_path', 'cards.cdb')
+        
+        cdb_path = os.path.join(self.db_dir, cdb_path_from_config)
         
         if not os.path.exists(cdb_path):
-            cdb_path = os.path.join(self.db_dir, "cards.cdb")
+            cdb_path = os.path.join(self.db_dir, fallback_cdb_path_from_config)
         
         results = []
         
@@ -174,11 +190,9 @@ class CardQueryCore:
             cursor = conn.cursor()
             
             if not sql:
-                sql = """
-                    SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot
-                    FROM datas d 
-                    JOIN texts t ON d.id = t.id
-                """
+                # 从配置文件读取默认SQL查询语句
+                card_query_config = config_manager.get_card_query_config()
+                sql = card_query_config.get('default_sql', "SELECT d.id, t.name, d.type, d.attribute, d.level, d.race, d.atk, d.def, t.desc, d.ot FROM datas d JOIN texts t ON d.id = t.id")
             
             logger.info(f"执行SQL: {sql}")
             cursor.execute(sql)
@@ -371,6 +385,9 @@ class CardQueryCore:
     
     def get_card_image_url(self, card_id: int) -> str:
         """获取卡片图片URL"""
-        image_url = f"https://cdn.233.momobako.com/ygopro/pics/{card_id}.jpg"
+        # 从配置文件读取图片URL模板
+        card_query_config = config_manager.get_card_query_config()
+        image_url_template = card_query_config.get('image_url_template', "https://cdn.233.momobako.com/ygopro/pics/{card_id}.jpg")
+        image_url = image_url_template.format(card_id=card_id)
         logger.info(f"生成卡片图片链接: {card_id}")
         return image_url

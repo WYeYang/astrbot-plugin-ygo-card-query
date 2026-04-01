@@ -7,6 +7,7 @@ import unittest
 import os
 import shutil
 import sys
+import asyncio
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -26,11 +27,15 @@ class TestCardQueryCore(unittest.TestCase):
         """测试更新数据库方法（数据库已存在时执行 git pull）"""
         print("\n=== 测试更新数据库（git pull） ===")
         
-        db_dir = os.path.join(self.test_dir, "ygopro-database")
+        # 从配置文件读取数据库目录配置
+        from ygo_card_query.core import config_manager
+        database_config = config_manager.get_database_config()
+        db_dir_name = database_config.get('db_dir', 'ygopro_database')
+        db_dir = os.path.join(self.test_dir, db_dir_name)
         print(f"数据库目录: {db_dir}")
         print(f"数据库目录是否存在: {os.path.exists(db_dir)}")
         
-        result = self.core.update_database()
+        result = asyncio.run(self.core.update_database())
         print(f"更新结果: {result}")
         
         self.assertEqual(result["status"], "success")
@@ -38,9 +43,20 @@ class TestCardQueryCore(unittest.TestCase):
         
         self.assertTrue(os.path.exists(db_dir), f"数据库目录不存在: {db_dir}")
         
-        cdb_path = os.path.join(db_dir, "locales", "zh-CN", "cards.cdb")
+        # 从配置文件读取数据库文件路径配置
+        cdb_path_from_config = database_config.get('cdb_path', 'locales/zh-CN/cards.cdb')
+        fallback_cdb_path_from_config = database_config.get('fallback_cdb_path', 'cards.cdb')
+        
+        cdb_path = os.path.join(db_dir, cdb_path_from_config)
         print(f"数据库文件路径: {cdb_path}")
         print(f"数据库文件是否存在: {os.path.exists(cdb_path)}")
+        
+        # 如果主路径不存在，使用备用路径
+        if not os.path.exists(cdb_path):
+            cdb_path = os.path.join(db_dir, fallback_cdb_path_from_config)
+            print(f"使用备用数据库文件路径: {cdb_path}")
+            print(f"数据库文件是否存在: {os.path.exists(cdb_path)}")
+        
         self.assertTrue(os.path.exists(cdb_path), f"数据库文件不存在: {cdb_path}")
         
         print("数据库更新测试通过（git pull）")
@@ -59,7 +75,7 @@ class TestCardQueryCore(unittest.TestCase):
         print(f"测试克隆目录: {test_clone_dir}")
         print(f"数据库目录: {core.db_dir}")
         
-        result = core.update_database()
+        result = asyncio.run(core.update_database())
         print(f"更新结果: {result}")
         
         self.assertEqual(result["status"], "success")
@@ -67,9 +83,22 @@ class TestCardQueryCore(unittest.TestCase):
         
         self.assertTrue(os.path.exists(core.db_dir), f"数据库目录不存在: {core.db_dir}")
         
-        cdb_path = os.path.join(core.db_dir, "locales", "zh-CN", "cards.cdb")
+        # 从配置文件读取数据库文件路径配置
+        from ygo_card_query.core import config_manager
+        database_config = config_manager.get_database_config()
+        cdb_path_from_config = database_config.get('cdb_path', 'locales/zh-CN/cards.cdb')
+        fallback_cdb_path_from_config = database_config.get('fallback_cdb_path', 'cards.cdb')
+        
+        cdb_path = os.path.join(core.db_dir, cdb_path_from_config)
         print(f"数据库文件路径: {cdb_path}")
         print(f"数据库文件是否存在: {os.path.exists(cdb_path)}")
+        
+        # 如果主路径不存在，使用备用路径
+        if not os.path.exists(cdb_path):
+            cdb_path = os.path.join(core.db_dir, fallback_cdb_path_from_config)
+            print(f"使用备用数据库文件路径: {cdb_path}")
+            print(f"数据库文件是否存在: {os.path.exists(cdb_path)}")
+        
         self.assertTrue(os.path.exists(cdb_path), f"数据库文件不存在: {cdb_path}")
         
         if os.path.exists(test_clone_dir):
@@ -82,7 +111,11 @@ class TestCardQueryCore(unittest.TestCase):
         """测试查询卡片方法"""
         print("\n=== 测试查询卡片 ===")
         
-        cdb_path = os.path.join(self.test_dir, "ygopro-database", "locales", "zh-CN", "cards.cdb")
+        # 从配置文件读取数据库目录配置
+        from ygo_card_query.core import config_manager
+        database_config = config_manager.get_database_config()
+        db_dir_name = database_config.get('db_dir', 'ygopro_database')
+        cdb_path = os.path.join(self.test_dir, db_dir_name, "locales", "zh-CN", "cards.cdb")
         if not os.path.exists(cdb_path):
             print("数据库不存在，跳过测试（需要手动调用 update_database 更新）")
             self.skipTest("数据库不存在")
