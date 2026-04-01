@@ -130,7 +130,7 @@ exit /b 0
 
 :run_server
 echo [INFO] 启动 MCP 服务器...
-python mcp_server.py
+python -m ygo_card_query.mcp.server
 exit /b 0
 
 :install

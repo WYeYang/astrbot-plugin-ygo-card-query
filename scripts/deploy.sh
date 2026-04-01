@@ -123,7 +123,7 @@ update_database() {
 
 run_server() {
     print_info "启动 MCP 服务器..."
-    $PYTHON_CMD mcp_server.py
+    $PYTHON_CMD -m ygo_card_query.mcp.server
 }
 
 show_help() {
