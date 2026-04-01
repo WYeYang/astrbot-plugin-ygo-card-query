@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ygo-card-query": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "cwd": "/path/to/astrbot-plugin-ygo-card-query"
+    }
+  }
+}
