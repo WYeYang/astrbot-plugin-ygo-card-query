@@ -69,14 +69,6 @@ SQL查询格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
             }
         ),
         Tool(
-            name="update_database",
-            description="更新游戏王卡片数据库。从GitHub克隆或拉取最新的卡片数据库。首次使用或需要更新卡片数据时调用。",
-            inputSchema={
-                "type": "object",
-                "properties": {}
-            }
-        ),
-        Tool(
             name="get_card_count",
             description="获取数据库中卡片总数。",
             inputSchema={
