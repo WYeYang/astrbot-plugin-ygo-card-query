@@ -1,0 +1,19 @@
+[project]
+name = "ygo-card-query"
+version = "0.1.0"
+description = "YGO Card Query Plugin and MCP Service"
+authors = [
+    { name = "Author", email = "author@example.com" }
+]
+dependencies = [
+    "PyYAML",
+    "mcp",
+    "requests"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]

@@ -103,6 +103,10 @@ async def test_http_service():
     try:
         response = requests.post(
             'http://localhost:8000/mcp',
+            headers={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             json={
                 "jsonrpc": "2.0",
                 "method": "list_tools",
@@ -124,6 +128,10 @@ async def test_http_service():
     try:
         response = requests.post(
             'http://localhost:8000/mcp',
+            headers={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             json={
                 "jsonrpc": "2.0",
                 "method": "call_tool",
