@@ -5,6 +5,7 @@
 """
 
 import os
+import platform
 import yaml
 from typing import Dict, Any
 
@@ -20,8 +21,21 @@ class ConfigManager:
             config_path: 配置文件路径，如果为None则使用默认路径
         """
         if config_path is None:
-            # 默认配置文件路径
-            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "config.yaml")
+            # 获取平台信息
+            current_platform = platform.system().lower()
+            
+            # 构建平台特定的配置文件路径
+            config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config")
+            platform_config_path = os.path.join(config_dir, f"config_{current_platform}.yaml")
+            default_config_path = os.path.join(config_dir, "config.yaml")
+            
+            # 优先使用平台特定的配置文件，如果不存在则使用默认配置文件
+            if os.path.exists(platform_config_path):
+                config_path = platform_config_path
+                print(f"使用平台特定配置文件: {config_path}")
+            else:
+                config_path = default_config_path
+                print(f"使用默认配置文件: {config_path}")
         
         self.config_path = config_path
         self.config = self._load_config()
