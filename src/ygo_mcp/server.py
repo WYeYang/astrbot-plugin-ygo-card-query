@@ -14,7 +14,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
-from ..core import CardQueryCore, config_manager
+from core import CardQueryCore, config_manager
 
 # 从配置文件读取MCP服务器配置
 mcp_config = config_manager.get_mcp_config()

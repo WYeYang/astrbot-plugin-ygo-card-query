@@ -3,7 +3,7 @@
 游戏王查卡插件 - 基于asrtbot
 """
 
-from ..core import CardQueryCore
+from core import CardQueryCore
 from astrbot.api.star import Star, register, StarTools
 from astrbot.api.event import filter
 from astrbot.core.config.astrbot_config import AstrBotConfig

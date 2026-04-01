@@ -5,7 +5,7 @@
 基于 Model Context Protocol (MCP) 标准
 """
 
-from ygo_card_query.mcp import main
+from ygo_mcp import main
 
 if __name__ == "__main__":
     import asyncio

@@ -4,4 +4,4 @@
 基于 asrtbot
 """
 
-from ygo_card_query.plugins.astrbot_plugin import CardQueryPlugin
+from plugins.astrbot_plugin import CardQueryPlugin

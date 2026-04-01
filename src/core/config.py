@@ -21,7 +21,7 @@ class ConfigManager:
         """
         if config_path is None:
             # 默认配置文件路径
-            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "config.yaml")
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "config.yaml")
             print(f"使用默认配置文件: {config_path}")
         
         self.config_path = config_path
