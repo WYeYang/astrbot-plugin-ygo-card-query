@@ -69,7 +69,8 @@ activate_venv() {
 install_dependencies() {
     print_info "安装依赖..."
     pip install --upgrade pip
-    pip install -r requirements.txt
+    # 使用根目录的requirements.txt文件
+    pip install -r "$SCRIPT_DIR/../../requirements.txt"
     print_success "依赖安装完成"
 }
 
@@ -123,7 +124,15 @@ update_database() {
 
 run_server() {
     print_info "启动 MCP 服务器..."
-    $PYTHON_CMD -m ygo_mcp.server
+    # 默认使用 streamable-http 模式
+    # 添加src目录到Python路径
+    PYTHONPATH="$SCRIPT_DIR/.." $PYTHON_CMD -m ygo_mcp.server --transport streamable-http
+}
+
+run_server_stdio() {
+    print_info "启动 MCP 服务器 (stdio 模式)..."
+    # 添加src目录到Python路径
+    PYTHONPATH="$SCRIPT_DIR/.." $PYTHON_CMD -m ygo_mcp.server --transport stdio
 }
 
 show_help() {
@@ -133,13 +142,15 @@ show_help() {
     echo ""
     echo "命令:"
     echo "  install     安装依赖并初始化数据库（首次部署）"
-    echo "  run         运行 MCP 服务器"
+    echo "  run         运行 MCP 服务器 (默认使用 streamable-http 模式)"
+    echo "  run-stdio   运行 MCP 服务器 (stdio 模式)"
     echo "  update      更新卡片数据库"
     echo "  help        显示帮助信息"
     echo ""
     echo "示例:"
     echo "  $0 install    # 首次部署"
-    echo "  $0 run        # 运行服务器"
+    echo "  $0 run        # 运行服务器 (streamable-http 模式)"
+    echo "  $0 run-stdio  # 运行服务器 (stdio 模式)"
     echo "  $0 update     # 更新数据库"
 }
 
@@ -155,7 +166,8 @@ case "${1:-}" in
         print_success "部署完成！"
         echo ""
         echo "运行以下命令启动服务器:"
-        echo "  ./deploy.sh run"
+        echo "  ./deploy.sh run        # streamable-http 模式"
+        echo "  ./deploy.sh run-stdio  # stdio 模式"
         ;;
     run)
         check_python
@@ -165,6 +177,15 @@ case "${1:-}" in
         fi
         activate_venv
         run_server
+        ;;
+    run-stdio)
+        check_python
+        if [ ! -d "venv" ]; then
+            print_error "虚拟环境不存在，请先运行: $0 install"
+            exit 1
+        fi
+        activate_venv
+        run_server_stdio
         ;;
     update)
         check_git

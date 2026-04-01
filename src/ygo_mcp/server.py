@@ -44,7 +44,6 @@ else:
 core = CardQueryCore(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 
-@app.list_tools()
 async def list_tools() -> list[Tool]:
     # 从配置文件读取工具列表
     mcp_config = config_manager.get_mcp_config()
@@ -122,8 +121,10 @@ SQL查询格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
     
     return tools
 
+# 注册工具列表
+app.list_tools = list_tools
 
-@app.call_tool()
+
 async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     try:
         if name == "query_card":
@@ -177,16 +178,22 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     except Exception as e:
         return [TextContent(type="text", text=f"执行出错: {str(e)}")]
 
+# 注册工具调用函数
+app.call_tool = call_tool
 
-async def main():
+
+def main():
     if args.transport == 'streamable-http':
         # 运行 Streamable HTTP 服务器
-        await app.run(transport='streamable-http')
+        app.run(transport='streamable-http')
     else:
         # 运行标准输入输出服务器
-        async with stdio_server() as (read_stream, write_stream):
-            await app.run(read_stream, write_stream, app.create_initialization_options())
+        async def run_stdio():
+            async with stdio_server() as (read_stream, write_stream):
+                await app.run(read_stream, write_stream, app.create_initialization_options())
+        
+        asyncio.run(run_stdio())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
