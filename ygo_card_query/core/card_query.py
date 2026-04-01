@@ -2,6 +2,14 @@
 """
 游戏王查卡核心功能模块
 不依赖asrtbot，可独立使用
+
+免责声明：
+- 卡片数据来源：https://github.com/moecube/ygopro-database
+- 卡片图片来源：https://cdn.233.momobako.com/ygopro/pics/
+- 本模块仅用于学习和娱乐目的，不用于商业用途
+- 所有卡片数据和图片的版权归其各自的所有者所有
+- 游戏王（Yu-Gi-Oh!）及其相关内容为 KONAMI 公司的注册商标
+- 本模块为非官方工具，与 KONAMI 公司无任何关联
 """
 
 import os
