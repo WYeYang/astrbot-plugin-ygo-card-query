@@ -80,6 +80,47 @@ Bot：开始更新数据库，并返回更新结果
 - 更新数据库需要网络连接
 - 数据库文件较大，确保有足够的存储空间
 
+## MCP 配置
+
+### 什么是 MCP
+MCP (Model Context Protocol) 是一种用于与模型上下文交互的协议，本插件提供了 MCP 服务支持，可以通过 MCP 协议与插件进行交互。
+
+### 配置文件
+MCP 配置文件位于 `src/config/mcp_config_example.json`，您可以根据需要修改配置：
+
+```json
+{
+  "mcpServers": {
+    "ygo-card-query": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
+        "--",
+        "python",
+        "-m",
+        "ygo_mcp.server"
+      ],
+      "cwd": "/tmp"
+    }
+  }
+}
+```
+
+### 部署 MCP 服务
+
+#### 方法一：使用部署脚本
+- Linux/macOS: 运行 `src/ygo_mcp/deploy.sh`
+- Windows: 运行 `src/ygo_mcp/deploy.bat`
+
+#### 方法二：手动部署
+1. 安装依赖：`pip install uv`
+2. 运行 MCP 服务：`uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server`
+
+### MCP 服务功能
+- 提供卡片查询接口
+- 支持通过 MCP 协议与插件进行交互
+- 可集成到其他支持 MCP 的系统中
+
 ## 免责声明
 
 ### 数据来源
