@@ -3,7 +3,7 @@
     "ygo-card-query": {
       "command": "python",
       "args": ["-m", "ygo_card_query.mcp.server"],
-      "cwd": "/path/to/astrbot-plugin-ygo-card-query"
+      "cwd": "/path/to/astrbot-plugin-ygo-card-query/src"
     }
   }
 }
