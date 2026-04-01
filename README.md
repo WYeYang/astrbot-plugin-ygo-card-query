@@ -8,13 +8,30 @@
 
 ```
 astrbot-plugin-ygo-card-query/
-├── card_query.py          # 插件核心实现
-├── card_query_core.py     # 查卡核心功能模块
-├── main.py                # 插件入口
-├── metadata.yaml          # 插件配置文件
-├── requirements.txt       # 依赖项（当前为空）
-├── test_card_query.py     # 测试文件
-└── README.md              # 插件说明文档
+├── src/                   # 源代码目录
+│   ├── config/            # 配置文件目录
+│   │   ├── config.yaml                  # 插件配置文件
+│   │   └── mcp_config_example.json      # MCP配置示例文件
+│   ├── core/              # 核心功能模块
+│   │   ├── __init__.py                  # 包初始化文件
+│   │   ├── card_query.py                # 卡片查询核心实现
+│   │   └── config.py                    # 配置管理
+│   ├── plugins/           # 插件实现
+│   │   ├── __init__.py                  # 包初始化文件
+│   │   ├── astrbot_plugin.py            # AstrBot插件实现
+│   │   ├── main.py                      # 插件入口
+│   │   └── metadata.yaml                # 插件元数据
+│   └── ygo_mcp/           # MCP服务实现
+│       ├── __init__.py                  # 包初始化文件
+│       ├── deploy.bat                   # Windows部署脚本
+│       ├── deploy.sh                    # Linux/macOS部署脚本
+│       ├── mcp_server.py                # MCP服务器实现
+│       └── server.py                    # MCP服务入口
+├── test/                  # 测试目录
+├── README.md              # 插件说明文档
+├── requirements.txt       # 依赖项
+├── pyproject.toml         # 项目配置文件
+└── merge_summary.md       # 合并摘要
 ```
 
 ## 功能特性
@@ -27,9 +44,17 @@ astrbot-plugin-ygo-card-query/
 
 ## 安装方法
 
-1. 将插件目录复制到 AstrBot 的插件目录中
+### 方法一：作为 AstrBot 插件安装
+1. 将 `src/plugins` 目录复制到 AstrBot 的插件目录中
 2. 重启 AstrBot 即可使用
 3. 首次使用时会自动克隆 ygopro-database 数据库（可能需要一些时间）
+
+### 方法二：使用 MCP 服务
+1. 安装依赖：`pip install uv`
+2. 运行 MCP 服务：`uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server`
+3. 或者使用部署脚本：
+   - Linux/macOS: `src/ygo_mcp/deploy.sh`
+   - Windows: `src/ygo_mcp/deploy.bat`
 
 ## 使用示例
 
