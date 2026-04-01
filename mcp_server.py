@@ -53,14 +53,6 @@ SQL查询格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
                 },
                 "required": ["sql"]
             }
-        ),
-        Tool(
-            name="get_card_count",
-            description="获取数据库中卡片总数。",
-            inputSchema={
-                "type": "object",
-                "properties": {}
-            }
         )
     ]
 
@@ -108,26 +100,6 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
                 output_lines.append(f"\n... 还有 {count - 10} 张卡片未显示")
             
             return [TextContent(type="text", text="\n".join(output_lines))]
-        
-        elif name == "get_card_count":
-            cdb_path = os.path.join(core.db_dir, "cards.cdb")
-            if not os.path.exists(cdb_path):
-                return [TextContent(
-                    type="text",
-                    text="数据库文件不存在，请联系管理员更新数据库"
-                )]
-            
-            import sqlite3
-            conn = sqlite3.connect(cdb_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM datas")
-            count = cursor.fetchone()[0]
-            conn.close()
-            
-            return [TextContent(
-                type="text",
-                text=f"数据库中共有 {count} 张卡片"
-            )]
         
         else:
             return [TextContent(type="text", text=f"未知工具: {name}")]
