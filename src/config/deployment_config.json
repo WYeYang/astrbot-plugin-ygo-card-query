@@ -3,7 +3,6 @@
     "ygo-card-query-deploy": {
       "name": "游戏王AI查卡",
       "description": "AI 智能查询游戏王卡牌信息，支持卡名、效果、类型检索",
-      "icon": "https://cdn-1309233702.cos.ap-guangzhou.myqcloud.com/game/icon/game-yugioh.png",
       "type": "streamableHttp",
       "url": "http://localhost:8000/mcp",
       "runtime": "python3",
