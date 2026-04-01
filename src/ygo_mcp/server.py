@@ -8,19 +8,38 @@
 import asyncio
 import os
 import sys
+import argparse
 from typing import Any
 
-from mcp.server import Server
+from mcp.server import Server, FastMCP
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
 from core import CardQueryCore, config_manager
 
+# 解析命令行参数
+parser = argparse.ArgumentParser(description='游戏王查卡 MCP 服务器')
+parser.add_argument('--transport', type=str, default='stdio', choices=['stdio', 'streamable-http'],
+                    help='传输方式 (默认: stdio)')
+parser.add_argument('--host', type=str, default='127.0.0.1',
+                    help='服务器主机 (默认: 127.0.0.1)')
+parser.add_argument('--port', type=int, default=8000,
+                    help='服务器端口 (默认: 8000)')
+args = parser.parse_args()
+
 # 从配置文件读取MCP服务器配置
 mcp_config = config_manager.get_mcp_config()
 server_name = mcp_config.get('server_name', 'ygo-card-query-mcp')
 
-app = Server(server_name)
+# 根据传输方式创建服务器
+if args.transport == 'streamable-http':
+    app = FastMCP(
+        name=server_name,
+        host=args.host,
+        port=args.port
+    )
+else:
+    app = Server(server_name)
 
 core = CardQueryCore(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
@@ -160,8 +179,13 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
 
 
 async def main():
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(read_stream, write_stream, app.create_initialization_options())
+    if args.transport == 'streamable-http':
+        # 运行 Streamable HTTP 服务器
+        await app.run(transport='streamable-http')
+    else:
+        # 运行标准输入输出服务器
+        async with stdio_server() as (read_stream, write_stream):
+            await app.run(read_stream, write_stream, app.create_initialization_options())
 
 
 if __name__ == "__main__":
