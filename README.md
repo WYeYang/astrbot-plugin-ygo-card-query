@@ -145,6 +145,46 @@ MCP 配置文件位于 `src/config/mcp_config_example.json`，您可以根据需
 - 提供卡片查询接口
 - 支持通过 MCP 协议与插件进行交互
 - 可集成到其他支持 MCP 的系统中
+- 支持 Streamable HTTP 传输方式
+
+### Streamable HTTP 配置
+
+Streamable HTTP 配置文件位于 `src/config/streamable_http_config.json`，您可以根据需要修改配置：
+
+```json
+{
+  "mcpServers": {
+    "ygo-card-query-http": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
+        "--",
+        "python",
+        "-m",
+        "ygo_mcp.server",
+        "--transport",
+        "streamable-http"
+      ],
+      "cwd": "/tmp",
+      "env": {
+        "MCP_SERVER_NAME": "ygo-card-query-mcp",
+        "MCP_HOST": "127.0.0.1",
+        "MCP_PORT": "8000"
+      }
+    }
+  }
+}
+```
+
+### 启动 Streamable HTTP 服务
+
+```bash
+# 使用配置文件启动
+uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server --transport streamable-http
+
+# 或者使用环境变量
+MCP_HOST=127.0.0.1 MCP_PORT=8000 python -m ygo_mcp.server --transport streamable-http
+```
 
 ## 免责声明
 

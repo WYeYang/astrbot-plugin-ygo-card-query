@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "ygo-card-query-http": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
+        "--",
+        "python",
+        "-m",
+        "ygo_mcp.server",
+        "--transport",
+        "streamable-http"
+      ],
+      "cwd": "/tmp",
+      "env": {
+        "MCP_SERVER_NAME": "ygo-card-query-mcp",
+        "MCP_HOST": "127.0.0.1",
+        "MCP_PORT": "8000"
+      }
+    }
+  }
+}
