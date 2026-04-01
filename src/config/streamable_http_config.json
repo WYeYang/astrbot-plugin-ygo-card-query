@@ -12,6 +12,7 @@
         "streamable-http"
       ],
       "cwd": "/tmp",
+      "url": "http://localhost:8000/mcp",
       "env": {
         "MCP_SERVER_NAME": "ygo-card-query-mcp",
         "MCP_HOST": "127.0.0.1",
