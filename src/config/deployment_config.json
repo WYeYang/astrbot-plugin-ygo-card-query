@@ -1,22 +1,8 @@
 {
   "mcpServers": {
     "ygo-card-query-deploy": {
-      "name": "游戏王AI查卡",
-      "description": "AI 智能查询游戏王卡牌信息，支持卡名、效果、类型检索",
-      "type": "streamableHttp",
-      "url": "http://localhost:8000/mcp",
-      "runtime": "python3",
-      "deployType": "streamableHttp",
-      "host": "0.0.0.0",
-      "port": 8000,
-      "path": "/mcp",
-      "command": "cd src/ygo_mcp && python -m ygo_mcp.server --transport streamable-http --host 0.0.0.0 --port 8000",
-      "resources": {
-        "cpu": 1,
-        "memory": 1024
-      },
-      "autoStart": true,
-      "protocol": "http"
+      "type": "streamable_http",
+      "url": "http://localhost:8000/mcp"
     }
   }
 }
