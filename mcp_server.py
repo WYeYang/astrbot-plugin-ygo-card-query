@@ -55,20 +55,6 @@ SQL查询格式：SELECT * FROM datas d JOIN texts t ON d.id=t.id WHERE ...
             }
         ),
         Tool(
-            name="get_card_image",
-            description="获取游戏王卡片图片URL。通过卡片ID获取对应的卡片图片链接。",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "card_id": {
-                        "type": "integer",
-                        "description": "卡片ID"
-                    }
-                },
-                "required": ["card_id"]
-            }
-        ),
-        Tool(
             name="get_card_count",
             description="获取数据库中卡片总数。",
             inputSchema={
@@ -123,37 +109,12 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             
             return [TextContent(type="text", text="\n".join(output_lines))]
         
-        elif name == "get_card_image":
-            card_id = arguments.get("card_id")
-            if not card_id:
-                return [TextContent(type="text", text="错误：缺少卡片ID参数")]
-            
-            image_url = core.get_card_image_url(card_id)
-            return [TextContent(
-                type="text",
-                text=f"卡片图片URL: {image_url}\n卡片ID: {card_id}"
-            )]
-        
-        elif name == "update_database":
-            result = await core.update_database()
-            
-            if result["status"] == "success":
-                return [TextContent(
-                    type="text",
-                    text=f"数据库更新成功！\n{result.get('output', '')}"
-                )]
-            else:
-                return [TextContent(
-                    type="text",
-                    text=f"数据库更新失败: {result.get('message', '未知错误')}"
-                )]
-        
         elif name == "get_card_count":
             cdb_path = os.path.join(core.db_dir, "cards.cdb")
             if not os.path.exists(cdb_path):
                 return [TextContent(
                     type="text",
-                    text="数据库文件不存在，请先调用 update_database 更新数据库"
+                    text="数据库文件不存在，请联系管理员更新数据库"
                 )]
             
             import sqlite3
