@@ -3,7 +3,7 @@
     "ygo-card-query": {
       "command": "uvx",
       "args": [
-        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@trae/solo-agent-RlnMVf",
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
         "--",
         "python",
         "-m",
