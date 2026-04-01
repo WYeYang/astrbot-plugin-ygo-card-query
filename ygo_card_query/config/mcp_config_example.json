@@ -2,7 +2,7 @@
   "mcpServers": {
     "ygo-card-query": {
       "command": "python",
-      "args": ["mcp_server.py"],
+      "args": ["-m", "ygo_card_query.mcp.server"],
       "cwd": "/path/to/astrbot-plugin-ygo-card-query"
     }
   }
