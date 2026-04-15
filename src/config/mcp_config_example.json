@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "ygo-card-query": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
+        "--",
+        "python",
+        "-m",
+        "ygo_mcp.server"
+      ],
+      "cwd": "/tmp"
+    }
+  }
+}

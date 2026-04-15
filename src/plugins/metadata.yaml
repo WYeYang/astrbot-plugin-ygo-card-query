@@ -1,0 +1,6 @@
+name: astrbot_plugin_ygo_card_query
+display_name: 游戏王查卡
+desc: 一个游戏王卡片查询插件，支持通过命令查询卡片信息，并手动更新游戏王卡片数据库
+version: 1.0.0
+author: Wen
+repo: https://github.com/WYeYang/astrbot-plugin-ygo-card-query

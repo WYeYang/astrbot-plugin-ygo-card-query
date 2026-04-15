@@ -8,13 +8,30 @@
 
 ```
 astrbot-plugin-ygo-card-query/
-├── card_query.py          # 插件核心实现
-├── card_query_core.py     # 查卡核心功能模块
-├── main.py                # 插件入口
-├── metadata.yaml          # 插件配置文件
-├── requirements.txt       # 依赖项（当前为空）
-├── test_card_query.py     # 测试文件
-└── README.md              # 插件说明文档
+├── src/                   # 源代码目录
+│   ├── config/            # 配置文件目录
+│   │   ├── config.yaml                  # 插件配置文件
+│   │   └── mcp_config_example.json      # MCP配置示例文件
+│   ├── core/              # 核心功能模块
+│   │   ├── __init__.py                  # 包初始化文件
+│   │   ├── card_query.py                # 卡片查询核心实现
+│   │   └── config.py                    # 配置管理
+│   ├── plugins/           # 插件实现
+│   │   ├── __init__.py                  # 包初始化文件
+│   │   ├── astrbot_plugin.py            # AstrBot插件实现
+│   │   ├── main.py                      # 插件入口
+│   │   └── metadata.yaml                # 插件元数据
+│   └── ygo_mcp/           # MCP服务实现
+│       ├── __init__.py                  # 包初始化文件
+│       ├── deploy.bat                   # Windows部署脚本
+│       ├── deploy.sh                    # Linux/macOS部署脚本
+│       ├── mcp_server.py                # MCP服务器实现
+│       └── server.py                    # MCP服务入口
+├── test/                  # 测试目录
+├── README.md              # 插件说明文档
+├── requirements.txt       # 依赖项
+├── pyproject.toml         # 项目配置文件
+└── merge_summary.md       # 合并摘要
 ```
 
 ## 功能特性
@@ -27,9 +44,17 @@ astrbot-plugin-ygo-card-query/
 
 ## 安装方法
 
-1. 将插件目录复制到 AstrBot 的插件目录中
+### 方法一：作为 AstrBot 插件安装
+1. 将 `src/plugins` 目录复制到 AstrBot 的插件目录中
 2. 重启 AstrBot 即可使用
 3. 首次使用时会自动克隆 ygopro-database 数据库（可能需要一些时间）
+
+### 方法二：使用 MCP 服务
+1. 安装依赖：`pip install uv`
+2. 运行 MCP 服务：`uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server`
+3. 或者使用部署脚本：
+   - Linux/macOS: `src/ygo_mcp/deploy.sh`
+   - Windows: `src/ygo_mcp/deploy.bat`
 
 ## 使用示例
 
@@ -79,3 +104,87 @@ Bot：开始更新数据库，并返回更新结果
 - 首次克隆数据库可能需要一些时间，请耐心等待
 - 更新数据库需要网络连接
 - 数据库文件较大，确保有足够的存储空间
+
+## MCP 配置
+
+### 什么是 MCP
+MCP (Model Context Protocol) 是一种用于与模型上下文交互的协议，本插件提供了 MCP 服务支持，可以通过 MCP 协议与插件进行交互。
+
+### 配置文件
+MCP 配置文件位于 `src/config/mcp_config_example.json`，您可以根据需要修改配置：
+
+```json
+{
+  "mcpServers": {
+    "ygo-card-query": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update",
+        "--",
+        "python",
+        "-m",
+        "ygo_mcp.server"
+      ],
+      "cwd": "/tmp"
+    }
+  }
+}
+```
+
+### 部署 MCP 服务
+
+#### 方法一：使用部署脚本
+- Linux/macOS: 运行 `src/ygo_mcp/deploy.sh`
+- Windows: 运行 `src/ygo_mcp/deploy.bat`
+
+#### 方法二：手动部署
+1. 安装依赖：`pip install uv`
+2. 运行 MCP 服务：`uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server`
+
+### MCP 服务功能
+- 提供卡片查询接口
+- 支持通过 MCP 协议与插件进行交互
+- 可集成到其他支持 MCP 的系统中
+- 支持 Streamable HTTP 传输方式
+
+### Streamable HTTP 配置
+
+Streamable HTTP 配置文件位于 `src/config/streamable_http_config.json`，您可以根据需要修改配置：
+
+```json
+{
+  "mcpServers": {
+    "ygo-card-query-http": {
+      "type": "streamableHttp",
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+### 启动 Streamable HTTP 服务
+
+```bash
+# 使用配置文件启动
+uvx git+https://github.com/WYeYang/astrbot-plugin-ygo-card-query.git@feat/mcp-config-update -- python -m ygo_mcp.server --transport streamable-http
+
+# 或者使用环境变量
+MCP_HOST=127.0.0.1 MCP_PORT=8000 python -m ygo_mcp.server --transport streamable-http
+```
+
+## 免责声明
+
+### 数据来源
+- **卡片数据**：使用 [ygopro-database](https://github.com/moecube/ygopro-database) 作为数据源
+- **卡片图片**：通过 [https://cdn.233.momobako.com/ygopro/pics/](https://cdn.233.momobako.com/ygopro/pics/) 获取卡片图片
+
+### 免责声明
+1. 本插件仅用于学习和娱乐目的，不用于商业用途
+2. 所有卡片数据和图片的版权归其各自的所有者所有
+3. 本插件不保证数据的准确性和完整性，如有错误请以官方资料为准
+4. 如因使用本插件产生任何问题，本插件作者不承担任何责任
+5. 如您是相关内容的版权所有者，且认为本插件侵犯了您的权益，请联系我们，我们将立即处理
+
+### 版权信息
+- 游戏王（Yu-Gi-Oh!）及其相关内容为 KONAMI 公司的注册商标
+- 本插件为非官方工具，与 KONAMI 公司无任何关联
